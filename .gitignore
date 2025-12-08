@@ -1,0 +1,7 @@
+# 忽略 Google 憑證
+credentials.json
+
+# 也可一併忽略 Python 快取
+__pycache__/
+*.pyc
+.env
