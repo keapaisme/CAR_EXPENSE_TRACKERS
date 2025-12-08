@@ -4,11 +4,24 @@ import gspread
 from google.oauth2.service_account import Credentials
 import pandas as pd
 from datetime import datetime
+import json
 
-# ===== 設定 Google Sheets =====
-SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-CREDS = Credentials.from_service_account_file("credentials.json", scopes=SCOPE)
-GC = gspread.authorize(CREDS)
+# ===== 設定 Google Sheets（從 Streamlit Secrets 讀取）=====
+try:
+    # 從 secrets 讀取 JSON 字串
+    creds_json = st.secrets["GOOGLE_CREDS"]
+    creds_dict = json.loads(creds_json)
+    SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    CREDS = Credentials.from_service_account_info(creds_dict, scopes=SCOPE)
+    GC = gspread.authorize(CREDS)
+
+    # 替換成你的 Spreadsheet ID（也可用 secrets 儲存，但直接寫也 OK）
+    SPREADSHEET_ID = "你的-spreadsheet-id"
+    SHEET = GC.open_by_key(SPREADSHEET_ID).sheet1
+
+except Exception as e:
+    st.error(f"❌ Google Sheets 連線失敗：{e}")
+    st.stop()
 
 # 請替換成你的 Spreadsheet ID
 SPREADSHEET_ID = "1-j6aUXNyIq9I53HTECW39-aGSLa8t_V13lGFSSki_Rg"
