@@ -147,7 +147,40 @@ if not df.empty:
 else:
     st.info("尚無支出記錄。")
 
-# ===== 顯示總支出 =====
-if not df.empty:
-    total = df["金額"].sum()
-    st.success(f"📊 總支出：**${total:,}**")
+# ===== 資料預處理：加入「年月」欄位 =====
+df_raw = load_data()
+if not df_raw.empty:
+    # 確保「日期」是 datetime 並建立「年月」
+    df_raw["日期"] = pd.to_datetime(df_raw["日期"], errors="coerce")
+    df_raw = df_raw.dropna(subset=["日期"])  # 移除無效日期
+    df_raw["年月"] = df_raw["日期"].dt.to_period("M")
+
+    # 按月份排序（最新在前）
+    all_months = sorted(df_raw["年月"].unique(), reverse=True)
+
+    # 預設選本月
+    current_month = pd.to_datetime("today").to_period("M")
+    default_month = current_month if current_month in all_months else all_months[0]
+
+    # 月份選擇器
+    selected_month = st.selectbox("📅 選擇月份", all_months, index=all_months.index(default_month))
+
+    # 過濾該月份資料
+    df_month = df_raw[df_raw["年月"] == selected_month].copy()
+
+    # 計算總支出
+    df_month["金額"] = pd.to_numeric(df_month["金額"], errors="coerce").fillna(0)
+    total = int(df_month["金額"].sum())
+
+    # 顯示總支出
+    st.success(f"📊 {selected_month} 總支出：**${total:,}**")
+
+    # 分類統計圖表
+    if not df_month.empty:
+        chart_data = df_month.groupby("分類")["金額"].sum().sort_values(ascending=False)
+        st.bar_chart(chart_data)
+    else:
+        st.info("該使用者月份無支出記錄。")
+
+else:
+    st.info("尚無任何支出記錄。")
