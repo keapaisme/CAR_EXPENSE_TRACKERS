@@ -1,51 +1,87 @@
 # app.py
 import streamlit as st
-import gspread
-from google.oauth2.service_account import Credentials
 import pandas as pd
 from datetime import datetime
+import os
 import json
 
-# ===== 設定 Google Sheets（從 Streamlit Secrets 讀取）=====
+# ===== 預先匯入可能用到的模組（避免在函式內重複 import）=====
 try:
-    # 從 secrets 讀取 JSON 字串
-    creds_json = st.secrets["GOOGLE_CREDS"]
-    creds_dict = json.loads(creds_json)
-    SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    CREDS = Credentials.from_service_account_info(creds_dict, scopes=SCOPE)
-    GC = gspread.authorize(CREDS)
+    from google.oauth2.service_account import Credentials
+    import gspread
 
-    # 替換成你的 Spreadsheet ID（也可用 secrets 儲存，但直接寫也 OK）
-    SPREADSHEET_ID = "1-j6aUXNyIq9I53HTECW39-aGSLa8t_V13lGFSSki_Rg"
-    SHEET = GC.open_by_key(SPREADSHEET_ID).sheet1
+    GOOGLE_ENABLED = True
+except ImportError:
+    GOOGLE_ENABLED = False
 
-except Exception as e:
-    st.error(f"❌ Google Sheets 連線失敗：{e}")
+
+# ===== 安全取得 Google 憑證（不觸發本機 secrets 錯誤）=====
+def get_google_credentials():
+    """優先使用本機 credentials.json；若不存在，則使用 Streamlit Secrets"""
+    # 本機開發：使用 credentials.json
+    if os.path.exists("credentials.json"):
+        return Credentials.from_service_account_file("credentials.json")
+
+    # 線上部署：使用 Streamlit Secrets
+    try:
+        creds_json = st.secrets["GOOGLE_CREDS"]
+        creds_dict = json.loads(creds_json)
+        return Credentials.from_service_account_info(creds_dict)
+    except KeyError:
+        raise FileNotFoundError("缺少 GOOGLE_CREDS Secrets（線上環境）")
+    except Exception as e:
+        raise Exception(f"載入憑證失敗: {e}")
+
+
+# ===== 設定 Google Sheets =====
+if GOOGLE_ENABLED:
+    try:
+        SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        creds = get_google_credentials().with_scopes(SCOPE)
+        gc = gspread.authorize(creds)
+
+        # 🔑 請替換成你的 Google Sheet ID
+        SPREADSHEET_ID = "1-j6aUXNyIq9I53HTECW39-aGSLa8t_V13lGFSSki_Rg"
+        # 🔧 請替換成你的工作表名稱（預設中文版是「工作表1」，英文版是「Sheet1」）
+        SHEET = gc.open_by_key(SPREADSHEET_ID).worksheet("draft_sheet")
+
+    except Exception as e:
+        st.error(f"❌ Google Sheets 連線失敗：{e}")
+        st.stop()
+else:
+    st.error("缺少必要套件：請安裝 gspread, google-auth")
     st.stop()
-
-# 請替換成你的 Spreadsheet ID
-SPREADSHEET_ID = "1-j6aUXNyIq9I53HTECW39-aGSLa8t_V13lGFSSki_Rg"
-SHEET = GC.open_by_key(SPREADSHEET_ID).sheet1  # 第一個工作表
 
 # ===== Streamlit 頁面設定 =====
 st.set_page_config(page_title="個人支出記錄系統", layout="centered")
 st.title("💰 個人支出記錄系統")
 
+# 環境提示（可選）
+if not os.path.exists("credentials.json"):
+    st.caption("🌐 線上版本")
+else:
+    st.caption("💻 本機測試版")
 
-# ===== 讀取現有資料 =====
+
+# ===== 讀取資料並轉換日期格式 =====
 def load_data():
     try:
         records = SHEET.get_all_records()
         df = pd.DataFrame(records)
         if df.empty:
             df = pd.DataFrame(columns=["日期", "分類", "金額", "備註"])
+        else:
+            # 🔑 關鍵：把「日期」欄位從字串轉為 datetime
+            df["日期"] = pd.to_datetime(df["日期"], errors="coerce").dt.date
+            # 將金額轉為數字（避免文字）
+            df["金額"] = pd.to_numeric(df["金額"], errors="coerce").fillna(0).astype(int)
         return df
     except Exception as e:
         st.error(f"讀取資料失敗：{e}")
         return pd.DataFrame(columns=["日期", "分類", "金額", "備註"])
 
 
-# ===== 功能：新增支出 =====
+# ===== 新增支出 =====
 with st.form("新增支出"):
     st.subheader("新增支出")
     col1, col2 = st.columns(2)
@@ -58,32 +94,60 @@ with st.form("新增支出"):
     submitted = st.form_submit_button("新增")
 
     if submitted:
-        new_row = [
-            date_input.strftime("%Y-%m-%d"),
-            category,
-            amount,
-            note
-        ]
-        SHEET.append_row(new_row)
-        st.success("✅ 支出已新增！")
+        if amount <= 0:
+            st.warning("⚠️ 請輸入大於 0 的金額")
+        else:
+            new_row = [
+                date_input.strftime("%Y-%m-%d"),
+                category,
+                amount,
+                note
+            ]
+            SHEET.append_row(new_row)
+            st.success("✅ 支出已新增！")
+            st.rerun()
 
-# ===== 顯示與編輯現有資料 =====
+# ===== 顯示與編輯資料 =====
 st.subheader("現有記錄")
 df = load_data()
 
 if not df.empty:
-    # 用 st.data_editor 允許編輯（Streamlit 1.17+）
-    edited_df = st.data_editor(df, num_rows="dynamic", key="editor")
+    edited_df = st.data_editor(
+        df,
+        num_rows="dynamic",
+        column_config={
+            "日期": st.column_config.DateColumn(format="YYYY-MM-DD"),
+            "金額": st.column_config.NumberColumn(format="$%d")
+        },
+        key="expense_editor"
+    )
 
-    # 比較變更並同步到 Google Sheets
     if st.button("儲存所有變更"):
-        # 清空現有資料（保留標題）
-        SHEET.clear()
-        SHEET.append_row(["日期", "分類", "金額", "備註"])  # 恢復標題
+        try:
+            SHEET.clear()
+            SHEET.append_row(["日期", "分類", "金額", "備註"])
 
-        # 寫入所有編輯後的資料
-        for _, row in edited_df.iterrows():
-            SHEET.append_row(row.tolist())
-        st.success("💾 所有變更已儲存！")
+            for _, row in edited_df.iterrows():
+                # 🔑 關鍵：把 date 轉回字串格式
+                date_str = row["日期"].strftime("%Y-%m-%d") if pd.notna(row["日期"]) else ""
+                amount_int = int(row["金額"]) if pd.notna(row["金額"]) else 0
+
+                new_row = [
+                    date_str,
+                    row["分類"],
+                    amount_int,
+                    row["備註"]
+                ]
+                SHEET.append_row(new_row)
+
+            st.success("💾 所有變更已儲存！")
+            st.rerun()
+        except Exception as e:
+            st.error(f"儲存失敗：{e}")
 else:
     st.info("尚無支出記錄。")
+
+# ===== 顯示總支出 =====
+if not df.empty:
+    total = df["金額"].sum()
+    st.success(f"📊 總支出：**${total:,}**")
