@@ -41,9 +41,9 @@
 
 ## 📸 介面預覽
 
-| 桌面版                                             | 手機版（iPhone） |
-|-------------------------------------------------|------------------|
-| ![Desktop](https://photos.app.goo.gl/PSpwe7t1u6VGz1m9A) | ![Mobile](https://photos.app.goo.gl/xYVnb32V9EGQZeXJ6) |
+| 桌面版                       | 手機版（iPhone）               |
+|---------------------------|---------------------------|
+| ![Desktop](img/desk1.png) | ![Mobile](img/mobie1.png) |
 
 ## 🛠️ 本機開發
 
@@ -54,7 +54,7 @@
 ### 安裝步驟
 ```bash
 # 1. 克隆專案
-git clone https://github.com/your-username/expense-tracker.git
+git clone https://github.com/keapaisme/expense-tracker.git
 cd expense-tracker
 
 # 2. 建立虛擬環境（可選但推薦）
