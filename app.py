@@ -16,7 +16,7 @@ try:
     GC = gspread.authorize(CREDS)
 
     # 替換成你的 Spreadsheet ID（也可用 secrets 儲存，但直接寫也 OK）
-    SPREADSHEET_ID = "你的-spreadsheet-id"
+    SPREADSHEET_ID = "1-j6aUXNyIq9I53HTECW39-aGSLa8t_V13lGFSSki_Rg"
     SHEET = GC.open_by_key(SPREADSHEET_ID).sheet1
 
 except Exception as e:
