@@ -1,18 +1,26 @@
-# 忽略系統與臨時檔
+# 系統與臨時檔
 .DS_Store
 
-# 忽略 Google 憑證檔
+# 憑證與密鑰檔
 credentials*
 *.json.bak*
-
-# 也可一併忽略 Python 快取
-__pycache__/
-*.pyc
 .env
 .venv/
+__pycache__/
+*.pyc
 
 # 測試檔與臨時目錄
 .tmp/
 test_*
 *.aiff
 *.wav
+
+# 本地開發與日誌規範（不上傳至 GitHub 遠端，僅保留在本地端）
+bak/
+日誌/
+.agents/
+presentation/
+
+# 忽略所有 Markdown 文件（僅保留發布用 README.md）
+*.md
+!README.md
