@@ -1,6 +1,6 @@
 <!DOCTYPE html><!--
-Version: v3.2
-Description: 個人支出記錄系統純前端網頁。升級至 v3.2，新增「展示模式」 (Demo Mode)。若 GAS API URL 或驗證 Token 設定為 "demo"，將啟用本地 Mock 數據與新增功能，免去後端連線以利展示與測試，並支援打勾成功動畫。
+Version: v3.3
+Description: 個人支出記錄系統純前端網頁。升級至 v3.3，清理舊有失效 GAS API URL，將預設連線欄位保持為空以保護個人隱私，準備發布至 GitHub Pages 免費靜態託管。
 -->
 
 <html lang="zh-TW">
@@ -1102,9 +1102,9 @@ Description: 個人支出記錄系統純前端網頁。升級至 v3.2，新增�
 
   <!-- JavaScript 程式邏輯 -->
   <script>
-    // ⚙️ 系統預設設定（可選：在此直接填入，手機開啟時就不必每次都輸入了）
-    const DEFAULT_GAS_API_URL = "https://script.google.com/macros/s/AKfycbylySu_I6LuC70k56RszCjE9iO99r89R-Z4d9xOvxI0eY2Xmws/exec"; 
-    const DEFAULT_API_TOKEN = "";   // 👈 您可以直接將您的 Token 密碼貼在此雙引號中
+    // ⚙️ 系統預設設定（可在瀏覽器 UI 輸入並儲存至 LocalStorage，保障隱私）
+    const DEFAULT_GAS_API_URL = ""; 
+    const DEFAULT_API_TOKEN = "";   // 👈 您可以在網頁面板輸入您的 Token 密碼
 
     let rawExpenses = [];      // 試算表原始支出資料
     let categoriesList = [];    // 分類

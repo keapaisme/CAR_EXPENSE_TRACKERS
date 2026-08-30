@@ -1,8 +1,8 @@
-<!--
-Version: v3.1
-Description: 個人支出記錄系統純前端網頁。升級至 v3.1，重構 UI 佈局，將「類別設定」移入設定 Modal 以保持主頁清爽。重構明細表為按年分組的純文字 iOS 列表，日期顯示為 MM/DD（如 02/06）避免截斷，點擊該列可彈出對話框編輯。
+<!DOCTYPE html><!--
+Version: v3.2
+Description: 個人支出記錄系統純前端網頁。升級至 v3.2，新增「展示模式」 (Demo Mode)。若 GAS API URL 或驗證 Token 設定為 "demo"，將啟用本地 Mock 數據與新增功能，免去後端連線以利展示與測試，並支援打勾成功動畫。
 -->
-<!DOCTYPE html>
+
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -10,7 +10,7 @@ Description: 個人支出記錄系統純前端網頁。升級至 v3.1，重構 U
   <title>🚗 愛車支出記錄系統</title>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
   <!-- FontAwesome for Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -796,211 +796,211 @@ Description: 個人支出記錄系統純前端網頁。升級至 v3.1，重構 U
 <body>
 
   <!-- 全局 Loading 遮罩 -->
-  <div class="loader-overlay" id="loaderOverlay">
-    <div class="spinner"></div>
+  <div data-hf-id="hf-4h4f" class="loader-overlay" id="loaderOverlay">
+    <div data-hf-id="hf-xi6v" class="spinner"></div>
   </div>
 
   <!-- iOS 成功勾勾動畫 -->
-  <div class="success-overlay" id="successOverlay">
-    <div class="success-box">
-      <svg class="checkmark-circle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-        <path class="checkmark-kick" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+  <div data-hf-id="hf-5s3r" class="success-overlay" id="successOverlay">
+    <div data-hf-id="hf-7vb9" class="success-box">
+      <svg data-hf-id="hf-om2m" class="checkmark-circle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+        <path data-hf-id="hf-kzni" class="checkmark-kick" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
       </svg>
-      <div class="success-text">已完成記帳</div>
+      <div data-hf-id="hf-ui56" class="success-text">已完成記帳</div>
     </div>
   </div>
 
   <!-- Toast 通知提示 -->
-  <div class="toast" id="toastMessage">
-    <i class="fa-solid fa-circle-check"></i>
-    <span>這是通知訊息</span>
+  <div data-hf-id="hf-v3kd" class="toast" id="toastMessage">
+    <i data-hf-id="hf-aef6" class="fa-solid fa-circle-check"></i>
+    <span data-hf-id="hf-y9cr">這是通知訊息</span>
   </div>
 
   <!-- 📱 主畫面視圖 (Main View) -->
-  <div id="mainView" class="container">
+  <div data-hf-id="hf-trpv" id="mainView" class="container">
     <!-- Header -->
-    <header>
-      <div class="brand-title">
-        <i class="fa-solid fa-car"></i> 愛車支出記帳
+    <header data-hf-id="hf-0drs">
+      <div data-hf-id="hf-g2nb" class="brand-title">
+        <i data-hf-id="hf-32mt" class="fa-solid fa-car"></i> 愛車支出記帳
       </div>
-      <button class="btn-settings" onclick="openSettingsModal()">
-        <i class="fa-solid fa-gear"></i> 設定
+      <button data-hf-id="hf-5e5l" class="btn-settings" onclick="openSettingsModal()">
+        <i data-hf-id="hf-rjxs" class="fa-solid fa-gear"></i> 設定
       </button>
     </header>
 
     <!-- 首次設定引導 -->
-    <div class="setup-alert" id="setupAlert" style="display: none;">
-      <i class="fa-solid fa-circle-info"></i>
-      <div>
-        <strong>尚未設定連線！</strong> 請點選右上角「設定」按鈕，輸入 Google Apps Script URL 以連接您的雲端試算表。
+    <div data-hf-id="hf-h56o" class="setup-alert" id="setupAlert" style="display: none;">
+      <i data-hf-id="hf-0ie2" class="fa-solid fa-circle-info"></i>
+      <div data-hf-id="hf-dbw9">
+        <strong data-hf-id="hf-8d1j">尚未設定連線！</strong> 請點選右上角「設定」按鈕，輸入 Google Apps Script URL 以連接您的雲端試算表。
       </div>
     </div>
 
     <!-- 可摺疊卡片：數據總覽 -->
-    <div class="card">
-      <div class="card-title collapsible" onclick="toggleCollapse('statsBody', 'statsArrow')">
-        <div class="card-title-left">
-          <i class="fa-solid fa-gauge-high"></i> 用車支出總覽
+    <div data-hf-id="hf-vn2y" class="card">
+      <div data-hf-id="hf-2qns" class="card-title collapsible" onclick="toggleCollapse('statsBody', 'statsArrow')">
+        <div data-hf-id="hf-2asm" class="card-title-left">
+          <i data-hf-id="hf-3t5v" class="fa-solid fa-gauge-high"></i> 用車支出總覽
         </div>
-        <i class="fa-solid fa-chevron-down collapse-arrow" id="statsArrow"></i>
+        <i data-hf-id="hf-qtri" class="fa-solid fa-chevron-down collapse-arrow" id="statsArrow"></i>
       </div>
-      <div class="card-body" id="statsBody">
-        <div class="stats-container">
-          <div class="stat-row">
-            <div class="stat-label">本月用車支出</div>
-            <div class="stat-value" id="monthTotalText">$0</div>
+      <div data-hf-id="hf-fuwy" class="card-body" id="statsBody">
+        <div data-hf-id="hf-2jnn" class="stats-container">
+          <div data-hf-id="hf-qwep" class="stat-row">
+            <div data-hf-id="hf-waqg" class="stat-label">本月用車支出</div>
+            <div data-hf-id="hf-f5bh" class="stat-value" id="monthTotalText">$0</div>
           </div>
-          <div class="stat-row">
-            <div class="stat-label">目前最新里程</div>
-            <div class="stat-value" id="currentMileageText">-- km</div>
+          <div data-hf-id="hf-uadh" class="stat-row">
+            <div data-hf-id="hf-gmer" class="stat-label">目前最新里程</div>
+            <div data-hf-id="hf-1lk2" class="stat-value" id="currentMileageText">-- km</div>
           </div>
-          <div class="stat-row">
-            <div class="stat-label">平均油資成本</div>
-            <div class="stat-value" id="avgFuelCostText">-- / km</div>
+          <div data-hf-id="hf-vhak" class="stat-row">
+            <div data-hf-id="hf-gxqp" class="stat-label">平均油資成本</div>
+            <div data-hf-id="hf-x58j" class="stat-value" id="avgFuelCostText">-- / km</div>
           </div>
-          <div class="stat-row">
-            <div class="stat-label">累計歷史花費</div>
-            <div class="stat-value" id="historyTotalText">$0</div>
+          <div data-hf-id="hf-v2zj" class="stat-row">
+            <div data-hf-id="hf-2qg5" class="stat-label">累計歷史花費</div>
+            <div data-hf-id="hf-a8vn" class="stat-value" id="historyTotalText">$0</div>
           </div>
         </div>
         <!-- 預算進度條 -->
-        <div class="budget-section">
-          <div class="budget-info">
-            <span class="stat-label">月預算使用進度</span>
-            <span id="budgetPctText" style="font-weight: 600; font-family: 'Arial', sans-serif;">0%</span>
+        <div data-hf-id="hf-7c4p" class="budget-section">
+          <div data-hf-id="hf-dryg" class="budget-info">
+            <span data-hf-id="hf-umko" class="stat-label">月預算使用進度</span>
+            <span data-hf-id="hf-2wps" id="budgetPctText" style="font-weight: 600; font-family: 'Arial', sans-serif;">0%</span>
           </div>
-          <div class="budget-progress-bar">
-            <div class="budget-progress-fill" id="budgetProgressBar"></div>
+          <div data-hf-id="hf-6qod" class="budget-progress-bar">
+            <div data-hf-id="hf-lh08" class="budget-progress-fill" id="budgetProgressBar"></div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- 可摺疊卡片：分類分析圖表 -->
-    <div class="card">
-      <div class="card-title collapsible" onclick="toggleCollapse('chartBody', 'chartArrow')">
-        <div class="card-title-left">
-          <i class="fa-solid fa-chart-pie"></i> 支出分類佔比
+    <div data-hf-id="hf-i08u" class="card">
+      <div data-hf-id="hf-5u2e" class="card-title collapsible" onclick="toggleCollapse('chartBody', 'chartArrow')">
+        <div data-hf-id="hf-efh2" class="card-title-left">
+          <i data-hf-id="hf-ka6y" class="fa-solid fa-chart-pie"></i> 支出分類佔比
         </div>
-        <i class="fa-solid fa-chevron-down collapse-arrow" id="chartArrow"></i>
+        <i data-hf-id="hf-vs7t" class="fa-solid fa-chevron-down collapse-arrow" id="chartArrow"></i>
       </div>
-      <div class="card-body" id="chartBody">
-        <div class="chart-container">
-          <canvas id="categoryChart"></canvas>
+      <div data-hf-id="hf-w7cr" class="card-body" id="chartBody">
+        <div data-hf-id="hf-ig1q" class="chart-container">
+          <canvas data-hf-id="hf-h3si" id="categoryChart"></canvas>
         </div>
       </div>
     </div>
 
     <!-- 新增愛車花費 -->
-    <div class="card">
-      <div class="card-title">
-        <div class="card-title-left">
-          <i class="fa-solid fa-plus-circle"></i> 新增愛車花費
+    <div data-hf-id="hf-iejv" class="card">
+      <div data-hf-id="hf-onlj" class="card-title">
+        <div data-hf-id="hf-tte8" class="card-title-left">
+          <i data-hf-id="hf-vet2" class="fa-solid fa-plus-circle"></i> 新增愛車花費
         </div>
       </div>
-      <div class="card-body" style="display: block;">
-        <form id="addExpenseForm" class="ios-form" onsubmit="handleAddExpense(event)">
-          <div class="ios-input-group">
-            <div class="ios-form-row">
-              <label for="expDate">日期</label>
-              <input type="date" id="expDate" required>
+      <div data-hf-id="hf-4uyh" class="card-body" style="display: block;">
+        <form data-hf-id="hf-wqey" id="addExpenseForm" class="ios-form" onsubmit="handleAddExpense(event)">
+          <div data-hf-id="hf-9hg6" class="ios-input-group">
+            <div data-hf-id="hf-51zp" class="ios-form-row">
+              <label data-hf-id="hf-1odv" for="expDate">日期</label>
+              <input data-hf-id="hf-4v3g" type="date" id="expDate" required>
             </div>
-            <div class="ios-form-row">
-              <label for="expCategory">支出分類</label>
-              <select id="expCategory" required>
-                <option value="" disabled selected>載入中...</option>
+            <div data-hf-id="hf-7rm1" class="ios-form-row">
+              <label data-hf-id="hf-sum2" for="expCategory">支出分類</label>
+              <select data-hf-id="hf-712l" id="expCategory" required>
+                <option data-hf-id="hf-rwnv" value="" disabled selected>載入中...</option>
               </select>
             </div>
-            <div class="ios-form-row">
-              <label for="expAmount">金額</label>
-              <input type="number" id="expAmount" min="1" step="1" placeholder="輸入金額" required>
+            <div data-hf-id="hf-8yj4" class="ios-form-row">
+              <label data-hf-id="hf-m0o5" for="expAmount">金額</label>
+              <input data-hf-id="hf-311y" type="number" id="expAmount" min="1" step="1" placeholder="輸入金額" required>
             </div>
-            <div class="ios-form-row">
-              <label for="expMileage">目前里程 (km)</label>
-              <input type="number" id="expMileage" placeholder="選填，自動記憶上次">
+            <div data-hf-id="hf-8k83" class="ios-form-row">
+              <label data-hf-id="hf-0bds" for="expMileage">目前里程 (km)</label>
+              <input data-hf-id="hf-b5ec" type="number" id="expMileage" placeholder="選填，自動記憶上次">
             </div>
-            <div class="ios-form-row">
-              <label for="expNote">備註說明</label>
-              <input type="text" id="expNote" placeholder="選填，例如：95加滿">
+            <div data-hf-id="hf-6koy" class="ios-form-row">
+              <label data-hf-id="hf-v9cz" for="expNote">備註說明</label>
+              <input data-hf-id="hf-tjl0" type="text" id="expNote" placeholder="選填，例如：95加滿">
             </div>
           </div>
 
           <!-- 人性化快捷輔助按鈕 -->
-          <div class="helper-section">
-            <div class="helper-title">金額快捷累加</div>
-            <div class="quick-tags" style="margin-bottom: 12px;">
-              <button type="button" class="quick-tag-btn" onclick="addAmount(100)">+100</button>
-              <button type="button" class="quick-tag-btn" onclick="addAmount(500)">+500</button>
-              <button type="button" class="quick-tag-btn" onclick="addAmount(1000)">+1000</button>
-              <button type="button" class="quick-tag-btn" onclick="addAmount(2000)">+2000</button>
+          <div data-hf-id="hf-cr46" class="helper-section">
+            <div data-hf-id="hf-r8vm" class="helper-title">金額快捷累加</div>
+            <div data-hf-id="hf-kx0n" class="quick-tags" style="margin-bottom: 12px;">
+              <button data-hf-id="hf-xwby" type="button" class="quick-tag-btn" onclick="addAmount(100)">+100</button>
+              <button data-hf-id="hf-8d4e" type="button" class="quick-tag-btn" onclick="addAmount(500)">+500</button>
+              <button data-hf-id="hf-410a" type="button" class="quick-tag-btn" onclick="addAmount(1000)">+1000</button>
+              <button data-hf-id="hf-idjg" type="button" class="quick-tag-btn" onclick="addAmount(2000)">+2000</button>
             </div>
 
-            <div class="helper-title">常用車用備註</div>
-            <div class="quick-tags">
-              <button type="button" class="quick-tag-btn" onclick="quickFillNote('95加滿', '加油')">⛽ 95加滿</button>
-              <button type="button" class="quick-tag-btn" onclick="quickFillNote('98加滿', '加油')">⛽ 98加滿</button>
-              <button type="button" class="quick-tag-btn" onclick="quickFillNote('自助洗車', '洗車/美容')">🧽 自助洗車</button>
-              <button type="button" class="quick-tag-btn" onclick="quickFillNote('eTag儲值', '停車/路費')">公路 eTag</button>
-              <button type="button" class="quick-tag-btn" onclick="quickFillNote('定期保養', '保養')">🔧 定期保養</button>
-              <button type="button" class="quick-tag-btn" onclick="quickFillNote('路邊停車', '停車/路費')">🅿️ 路邊停車</button>
+            <div data-hf-id="hf-8grn" class="helper-title">常用車用備註</div>
+            <div data-hf-id="hf-7l71" class="quick-tags">
+              <button data-hf-id="hf-3k5a" type="button" class="quick-tag-btn" onclick="quickFillNote('95加滿', '加油')">⛽ 95加滿</button>
+              <button data-hf-id="hf-dj74" type="button" class="quick-tag-btn" onclick="quickFillNote('98加滿', '加油')">⛽ 98加滿</button>
+              <button data-hf-id="hf-mjhy" type="button" class="quick-tag-btn" onclick="quickFillNote('自助洗車', '洗車/美容')">🧽 自助洗車</button>
+              <button data-hf-id="hf-zfkw" type="button" class="quick-tag-btn" onclick="quickFillNote('eTag儲值', '停車/路費')">公路 eTag</button>
+              <button data-hf-id="hf-tfmn" type="button" class="quick-tag-btn" onclick="quickFillNote('定期保養', '保養')">🔧 定期保養</button>
+              <button data-hf-id="hf-vm6f" type="button" class="quick-tag-btn" onclick="quickFillNote('路邊停車', '停車/路費')">🅿️ 路邊停車</button>
             </div>
           </div>
 
-          <button type="submit" class="btn-submit">
-            <i class="fa-solid fa-check"></i> 確認記帳
+          <button data-hf-id="hf-nrfr" type="submit" class="btn-submit">
+            <i data-hf-id="hf-7aoj" class="fa-solid fa-check"></i> 確認記帳
           </button>
         </form>
       </div>
     </div>
 
     <!-- 🍎 iOS 經典跳轉按鈕：進入明細頁 -->
-    <button class="btn-navigation-row" onclick="switchView('detailView')">
-      <span><i class="fa-solid fa-list-ul" style="color: var(--ios-gold); margin-right: 8px;"></i> 查看用車花費明細</span>
-      <i class="fa-solid fa-chevron-right" style="color: var(--ios-gray-muted); font-size: 13px;"></i>
+    <button data-hf-id="hf-eadl" class="btn-navigation-row" onclick="switchView('detailView')">
+      <span data-hf-id="hf-jsa5"><i data-hf-id="hf-7udn" class="fa-solid fa-list-ul" style="color: var(--ios-gold); margin-right: 8px;"></i> 查看用車花費明細</span>
+      <i data-hf-id="hf-rdqg" class="fa-solid fa-chevron-right" style="color: var(--ios-gray-muted); font-size: 13px;"></i>
     </button>
   </div>
 
   <!-- 📱 明細花費視圖 (Detail View - 獨立成另一頁) -->
-  <div id="detailView" class="container" style="display: none;">
+  <div data-hf-id="hf-lq50" id="detailView" class="container" style="display: none;">
     <!-- iOS Navbar -->
-    <div class="ios-navbar">
-      <button class="navbar-back-btn" onclick="switchView('mainView')">
-        <i class="fa-solid fa-chevron-left"></i> 返回
+    <div data-hf-id="hf-snni" class="ios-navbar">
+      <button data-hf-id="hf-u9si" class="navbar-back-btn" onclick="switchView('mainView')">
+        <i data-hf-id="hf-3o9s" class="fa-solid fa-chevron-left"></i> 返回
       </button>
-      <div class="navbar-title">花費明細</div>
-      <button class="navbar-action-btn" onclick="exportToCSV()">
-        <i class="fa-solid fa-file-export"></i> 匯出
+      <div data-hf-id="hf-zhup" class="navbar-title">花費明細</div>
+      <button data-hf-id="hf-1s7g" class="navbar-action-btn" onclick="exportToCSV()">
+        <i data-hf-id="hf-0a86" class="fa-solid fa-file-export"></i> 匯出
       </button>
     </div>
 
     <!-- 篩選面板 -->
-    <div class="card" style="padding: 14px; margin-bottom: 12px;">
-      <div class="filter-grid">
-        <select id="filterCategory" onchange="applyFilters()">
-          <option value="ALL">全部分類</option>
+    <div data-hf-id="hf-3yhl" class="card" style="padding: 14px; margin-bottom: 12px;">
+      <div data-hf-id="hf-4fsr" class="filter-grid">
+        <select data-hf-id="hf-tohu" id="filterCategory" onchange="applyFilters()">
+          <option data-hf-id="hf-hzre" value="ALL">全部分類</option>
         </select>
-        <input type="text" id="filterKeyword" placeholder="關鍵字搜尋（含里程）..." oninput="applyFilters()">
-        <button class="btn-settings" onclick="resetFilters()" style="padding: 8px 12px;">
-          <i class="fa-solid fa-rotate-left"></i>
+        <input data-hf-id="hf-a43b" type="text" id="filterKeyword" placeholder="關鍵字搜尋（含里程）..." oninput="applyFilters()">
+        <button data-hf-id="hf-3pzz" class="btn-settings" onclick="resetFilters()" style="padding: 8px 12px;">
+          <i data-hf-id="hf-74zi" class="fa-solid fa-rotate-left"></i>
         </button>
       </div>
     </div>
 
     <!-- 明細資料表格 (純文字唯讀化，點選行會彈出編輯對話框) -->
-    <div class="table-container">
-      <table id="expenseTable">
-        <thead>
-          <tr>
-            <th style="width: 18%">日期</th>
-            <th style="width: 22%">類別</th>
-            <th style="width: 18%">金額</th>
-            <th style="width: 34%">里程 & 備註</th>
-            <th style="width: 8%; text-align: center;"></th>
+    <div data-hf-id="hf-0psq" class="table-container">
+      <table data-hf-id="hf-a5yg" id="expenseTable">
+        <thead data-hf-id="hf-zd89">
+          <tr data-hf-id="hf-p3r7">
+            <th data-hf-id="hf-xvr6" style="width: 18%">日期</th>
+            <th data-hf-id="hf-g0y6" style="width: 22%">類別</th>
+            <th data-hf-id="hf-fz20" style="width: 18%">金額</th>
+            <th data-hf-id="hf-xz6h" style="width: 34%">里程 &amp; 備註</th>
+            <th data-hf-id="hf-5lkl" style="width: 8%; text-align: center;"></th>
           </tr>
         </thead>
-        <tbody id="expenseTableBody">
-          <tr>
-            <td colspan="5" style="text-align: center; color: var(--ios-gray-muted); padding: 20px;">
+        <tbody data-hf-id="hf-wgeg" id="expenseTableBody">
+          <tr data-hf-id="hf-ddj7">
+            <td data-hf-id="hf-iie5" colspan="5" style="text-align: center; color: var(--ios-gray-muted); padding: 20px;">
               載入明細中...
             </td>
           </tr>
@@ -1009,92 +1009,92 @@ Description: 個人支出記錄系統純前端網頁。升級至 v3.1，重構 U
     </div>
 
     <!-- 底部操作列 -->
-    <div class="table-footer">
-      <span style="font-size: 13px; font-weight: 600; color: var(--ios-gold); font-family: 'Arial', sans-serif;" id="filteredTotalText">
+    <div data-hf-id="hf-0xzs" class="table-footer">
+      <span data-hf-id="hf-au7h" style="font-size: 13px; font-weight: 600; color: var(--ios-gold); font-family: 'Arial', sans-serif;" id="filteredTotalText">
         篩選小計: $0 (0 筆)
       </span>
-      <button class="btn-save-changes" id="btnSaveChanges" onclick="handleSaveChanges()" style="display: none;">
-        <i class="fa-solid fa-cloud-arrow-up"></i> 儲存變更
+      <button data-hf-id="hf-7v0x" class="btn-save-changes" id="btnSaveChanges" onclick="handleSaveChanges()" style="display: none;">
+        <i data-hf-id="hf-13ty" class="fa-solid fa-cloud-arrow-up"></i> 儲存變更
       </button>
     </div>
   </div>
 
   <!-- 連線與系統設定 Modal (包含類別設定在內) -->
-  <div class="modal-overlay" id="settingsModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <span>⚙️ 系統設定</span>
-        <button class="modal-close" onclick="closeSettingsModal()">&times;</button>
+  <div data-hf-id="hf-hk30" class="modal-overlay" id="settingsModal">
+    <div data-hf-id="hf-liyz" class="modal-content">
+      <div data-hf-id="hf-20xn" class="modal-header">
+        <span data-hf-id="hf-wp0s">⚙️ 系統設定</span>
+        <button data-hf-id="hf-ao1l" class="modal-close" onclick="closeSettingsModal()">×</button>
       </div>
       
-      <div class="ios-form" style="gap: 16px;">
-        <div class="ios-input-group">
-          <div class="ios-form-row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
-            <label style="width: 100%;">GAS Web App URL</label>
-            <input type="url" id="cfgApiUrl" placeholder="https://script.google.com/macros/s/.../exec" style="text-align: left; width: 100%;">
+      <div data-hf-id="hf-bkl4" class="ios-form" style="gap: 16px;">
+        <div data-hf-id="hf-1lru" class="ios-input-group">
+          <div data-hf-id="hf-vrcp" class="ios-form-row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+            <label data-hf-id="hf-diko" style="width: 100%;">GAS Web App URL</label>
+            <input data-hf-id="hf-txmc" type="url" id="cfgApiUrl" placeholder="https://script.google.com/macros/s/.../exec" style="text-align: left; width: 100%;">
           </div>
-          <div class="ios-form-row">
-            <label>驗證金鑰 (Token)</label>
-            <input type="password" id="cfgToken" placeholder="輸入 API_TOKEN">
+          <div data-hf-id="hf-66dx" class="ios-form-row">
+            <label data-hf-id="hf-4ir4">驗證金鑰 (Token)</label>
+            <input data-hf-id="hf-5uyk" type="password" id="cfgToken" placeholder="輸入 API_TOKEN">
           </div>
-          <div class="ios-form-row">
-            <label>每月用車預算</label>
-            <input type="number" id="cfgBudget" placeholder="預設 15,000">
+          <div data-hf-id="hf-7db0" class="ios-form-row">
+            <label data-hf-id="hf-fbtt">每月用車預算</label>
+            <input data-hf-id="hf-0ud4" type="number" id="cfgBudget" placeholder="預設 15,000">
           </div>
         </div>
 
         <!-- 🏷️ 類別設定區塊 (移植到設定面板內) -->
-        <div class="modal-section-title">🏷️ 類別設定</div>
-        <div class="category-scroll" id="categoryListContainer">
-          <div style="color: var(--ios-gray-muted); font-size:11px; padding: 4px;">載入中...</div>
+        <div data-hf-id="hf-esu0" class="modal-section-title">🏷️ 類別設定</div>
+        <div data-hf-id="hf-0y5x" class="category-scroll" id="categoryListContainer">
+          <div data-hf-id="hf-wkqn" style="color: var(--ios-gray-muted); font-size:11px; padding: 4px;">載入中...</div>
         </div>
-        <div class="add-category-input" style="margin-bottom: 10px;">
-          <input type="text" id="newCategoryInput" placeholder="新類別名稱" style="padding: 6px 10px; font-size:13px; text-align:left;">
-          <button class="btn-add-cat" onclick="handleAddCategory()" style="padding: 6px 12px; font-weight:600; font-size:12px;">新增</button>
+        <div data-hf-id="hf-dukt" class="add-category-input" style="margin-bottom: 10px;">
+          <input data-hf-id="hf-i1n7" type="text" id="newCategoryInput" placeholder="新類別名稱" style="padding: 6px 10px; font-size:13px; text-align:left;">
+          <button data-hf-id="hf-x7bp" class="btn-add-cat" onclick="handleAddCategory()" style="padding: 6px 12px; font-weight:600; font-size:12px;">新增</button>
         </div>
         
         <!-- 錯誤提示容器 -->
-        <div id="settingsErrorMsg" style="color: var(--ios-danger); font-size: 11px; display: none; text-align: left; line-height: 1.4;"></div>
+        <div data-hf-id="hf-icu8" id="settingsErrorMsg" style="color: var(--ios-danger); font-size: 11px; display: none; text-align: left; line-height: 1.4;"></div>
         
-        <button class="btn-submit" onclick="saveSettings()">
-          <i class="fa-solid fa-circle-check"></i> 儲存並同步資料
+        <button data-hf-id="hf-fhna" class="btn-submit" onclick="saveSettings()">
+          <i data-hf-id="hf-xo12" class="fa-solid fa-circle-check"></i> 儲存並同步資料
         </button>
       </div>
     </div>
   </div>
 
   <!-- 📝 編輯記錄對話框 Modal -->
-  <div class="modal-overlay" id="editRecordModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <span>📝 編輯花費明細</span>
-        <button class="modal-close" onclick="closeEditRecordModal()">&times;</button>
+  <div data-hf-id="hf-uvco" class="modal-overlay" id="editRecordModal">
+    <div data-hf-id="hf-cwq3" class="modal-content">
+      <div data-hf-id="hf-6sjf" class="modal-header">
+        <span data-hf-id="hf-95d6">📝 編輯花費明細</span>
+        <button data-hf-id="hf-o63t" class="modal-close" onclick="closeEditRecordModal()">×</button>
       </div>
       
-      <div class="ios-form" style="gap: 16px;">
-        <div class="ios-input-group">
-          <div class="ios-form-row">
-            <label for="editExpDate">日期</label>
-            <input type="date" id="editExpDate" required>
+      <div data-hf-id="hf-j2ds" class="ios-form" style="gap: 16px;">
+        <div data-hf-id="hf-202v" class="ios-input-group">
+          <div data-hf-id="hf-6yzz" class="ios-form-row">
+            <label data-hf-id="hf-ao2v" for="editExpDate">日期</label>
+            <input data-hf-id="hf-2nts" type="date" id="editExpDate" required>
           </div>
-          <div class="ios-form-row">
-            <label for="editExpCategory">支出分類</label>
-            <select id="editExpCategory" required></select>
+          <div data-hf-id="hf-4zgu" class="ios-form-row">
+            <label data-hf-id="hf-wjfy" for="editExpCategory">支出分類</label>
+            <select data-hf-id="hf-nwp5" id="editExpCategory" required></select>
           </div>
-          <div class="ios-form-row">
-            <label for="editExpAmount">金額</label>
-            <input type="number" id="editExpAmount" min="1" step="1" required>
+          <div data-hf-id="hf-4l5t" class="ios-form-row">
+            <label data-hf-id="hf-2p35" for="editExpAmount">金額</label>
+            <input data-hf-id="hf-abcd" type="number" id="editExpAmount" min="1" step="1" required>
           </div>
-          <div class="ios-form-row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
-            <label style="width: 100%;">備註與里程</label>
-            <input type="text" id="editExpNote" placeholder="例如：[125000 km] 95加滿" style="text-align: left; width: 100%;">
+          <div data-hf-id="hf-udql" class="ios-form-row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+            <label data-hf-id="hf-l099" style="width: 100%;">備註與里程</label>
+            <input data-hf-id="hf-wrep" type="text" id="editExpNote" placeholder="例如：[125000 km] 95加滿" style="text-align: left; width: 100%;">
           </div>
         </div>
         
-        <input type="hidden" id="editExpRowNum">
+        <input data-hf-id="hf-dn0m" type="hidden" id="editExpRowNum">
         
-        <button class="btn-submit" onclick="saveEditedRecord()" style="background-color: var(--ios-blue); color: #ffffff; box-shadow: none;">
-          <i class="fa-solid fa-circle-check"></i> 確定修改
+        <button data-hf-id="hf-fme8" class="btn-submit" onclick="saveEditedRecord()" style="background-color: var(--ios-blue); color: #ffffff; box-shadow: none;">
+          <i data-hf-id="hf-y2c3" class="fa-solid fa-circle-check"></i> 確定修改
         </button>
       </div>
     </div>
@@ -1299,6 +1299,28 @@ Description: 個人支出記錄系統純前端網頁。升級至 v3.1，重構 U
     async function loadDataFromSheet() {
       const apiUrl = localStorage.getItem('gas_api_url');
       const apiToken = localStorage.getItem('gas_api_token');
+
+      if (apiUrl === 'demo' || apiToken === 'demo') {
+        showLoading(true);
+        rawExpenses = [
+          {"id": 1, "date": "2026-07-28", "category": "油資", "amount": 1200, "note": "[124800 km] 95加滿"},
+          {"id": 2, "date": "2026-07-29", "category": "保養", "amount": 4500, "note": "[125000 km] 定期保養"},
+          {"id": 3, "date": "2026-07-29", "category": "洗車", "amount": 150, "note": "自助洗車"},
+          {"id": 4, "date": "2026-07-30", "category": "停車", "amount": 80, "note": "路邊停車"}
+        ];
+        categoriesList = ["油資", "保養", "洗車", "停車", "保險", "規費", "其他"];
+        wasModified = false;
+        document.getElementById('btnSaveChanges').style.display = 'none';
+
+        updateCategoriesDropdown();
+        updateCategoriesBadges();
+        updateDashboardStats();
+        renderChart();
+        populateExpenseTable(rawExpenses);
+        showToast("雲端資料同步成功 (展示模式)", true);
+        showLoading(false);
+        return;
+      }
 
       if (!apiUrl || !apiToken) return;
 
@@ -1783,6 +1805,33 @@ Description: 個人支出記錄系統純前端網頁。升級至 v3.1，重構 U
         localStorage.setItem('last_mileage', mileage);
         document.getElementById('expMileage').placeholder = `前次里程: ${mileage}`;
         note = `[${mileage} km] ${note}`.trim();
+      }
+
+      if (apiUrl === 'demo' || apiToken === 'demo') {
+        showLoading(true);
+        const newId = rawExpenses.length + 1;
+        rawExpenses.unshift({
+          id: newId,
+          date: date,
+          category: category,
+          amount: Number(amount),
+          note: note
+        });
+
+        document.getElementById('expAmount').value = '';
+        document.getElementById('expMileage').value = '';
+        document.getElementById('expNote').value = '';
+
+        triggerSuccessAnimation();
+
+        setTimeout(async () => {
+          updateDashboardStats();
+          renderChart();
+          populateExpenseTable(rawExpenses);
+          showToast("新增成功 (展示模式)", true);
+          showLoading(false);
+        }, 1000);
+        return;
       }
 
       showLoading(true);

@@ -1,6 +1,6 @@
 <!DOCTYPE html><!--
-Version: v3.3
-Description: 個人支出記錄系統純前端網頁。升級至 v3.3，清理舊有失效 GAS API URL，將預設連線欄位保持為空以保護個人隱私，準備發布至 GitHub Pages 免費靜態託管。
+Version: v3.4
+Description: 個人支出記錄系統純前端網頁。升級至 v3.4，預設連線 URL 與 Token 設為 "demo"，使網頁開啟即自動載入體驗展示模式與 Mock 數據，隨時可在設定選單替換為個人 GAS 連線。
 -->
 
 <html lang="zh-TW">
@@ -1102,9 +1102,9 @@ Description: 個人支出記錄系統純前端網頁。升級至 v3.3，清理�
 
   <!-- JavaScript 程式邏輯 -->
   <script>
-    // ⚙️ 系統預設設定（可在瀏覽器 UI 輸入並儲存至 LocalStorage，保障隱私）
-    const DEFAULT_GAS_API_URL = ""; 
-    const DEFAULT_API_TOKEN = "";   // 👈 您可以在網頁面板輸入您的 Token 密碼
+    // ⚙️ 系統預設設定（預設為 demo 模式，開箱即可試用範例數據；隨時可在選單替換為正式 GAS URL）
+    const DEFAULT_GAS_API_URL = "demo"; 
+    const DEFAULT_API_TOKEN = "demo";
 
     let rawExpenses = [];      // 試算表原始支出資料
     let categoriesList = [];    // 分類

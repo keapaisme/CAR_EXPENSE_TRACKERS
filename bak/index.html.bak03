@@ -1,12 +1,12 @@
 <!--
-Version: v2.2
-Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復設定畫面反覆彈出的 UX 問題。現在若連線或同步失敗，設定視窗將保持開啟並直接在視窗內顯示詳細的錯誤排查指引，避免無窮彈出。
+Version: v3.1
+Description: 個人支出記錄系統純前端網頁。升級至 v3.1，重構 UI 佈局，將「類別設定」移入設定 Modal 以保持主頁清爽。重構明細表為按年分組的純文字 iOS 列表，日期顯示為 MM/DD（如 02/06）避免截斷，點擊該列可彈出對話框編輯。
 -->
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>🚗 愛車支出記錄系統</title>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,18 +42,24 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       -webkit-tap-highlight-color: transparent;
     }
 
+    html, body {
+      background-color: var(--ios-bg);
+      max-width: 100vw;
+      overflow-x: hidden; /* 徹底杜絕橫向滑動問題 */
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "SF Pro Text", "Segoe UI", "PingFang TC", "Microsoft JhengHei", Arial, sans-serif;
-      background-color: var(--ios-bg);
       color: var(--ios-gray-light);
       line-height: 1.5;
-      padding-bottom: 80px;
+      padding-bottom: 40px;
     }
 
     .container {
-      max-width: 800px;
+      max-width: 600px; /* 限制固定手機寬度頁面 */
       margin: 0 auto;
-      padding: 20px;
+      padding: 16px;
+      width: 100%;
     }
 
     /* Header */
@@ -61,18 +67,18 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 24px 0 16px 0;
-      margin-bottom: 20px;
+      padding: 16px 0 8px 0;
+      margin-bottom: 12px;
     }
 
     .brand-title {
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 700;
       letter-spacing: -0.5px;
       color: #ffffff;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     .brand-title i {
@@ -86,7 +92,7 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       padding: 8px 16px;
       border-radius: 20px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 500;
       transition: var(--transition-ios);
       display: flex;
@@ -100,19 +106,20 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
 
     /* Setup Alert */
     .setup-alert {
-      background-color: rgba(255, 69, 58, 0.15);
+      background-color: rgba(255, 69, 58, 0.12);
       border: 1px solid var(--ios-danger);
       border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 20px;
+      padding: 14px;
+      margin-bottom: 16px;
       display: flex;
       align-items: flex-start;
-      gap: 12px;
+      gap: 10px;
       color: #ff9f0a;
+      font-size: 13px;
     }
 
     .setup-alert i {
-      font-size: 20px;
+      font-size: 18px;
       margin-top: 2px;
     }
 
@@ -120,57 +127,89 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
     .card {
       background-color: var(--ios-card);
       border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 20px;
+      padding: 18px;
+      margin-bottom: 16px;
       box-shadow: var(--shadow-soft);
       border: 1px solid var(--ios-border);
       transition: var(--transition-ios);
+      width: 100%;
     }
 
+    /* 可摺疊卡片標題樣式 */
     .card-title {
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 600;
       color: #ffffff;
-      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      user-select: none;
+    }
+
+    .card-title.collapsible {
+      cursor: pointer;
+    }
+
+    .card-title-left {
       display: flex;
       align-items: center;
       gap: 8px;
+      border-left: 4px solid var(--ios-gold);
+      padding-left: 8px;
     }
 
-    .card-title i {
+    .card-title-left i {
       color: var(--ios-gold);
     }
 
-    /* 儀表板 Layout */
+    .collapse-arrow {
+      font-size: 13px;
+      color: var(--ios-gray-muted);
+      transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .collapse-arrow.collapsed {
+      transform: rotate(-90deg);
+    }
+
+    /* 摺疊內容容器 */
+    .card-body {
+      margin-top: 16px;
+      transition: max-height 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.25s ease;
+      overflow: hidden;
+      max-height: 800px; /* 足夠大的預設展開高度 */
+      opacity: 1;
+    }
+
+    .card-body.collapsed {
+      max-height: 0 !important;
+      opacity: 0 !important;
+      margin-top: 0 !important;
+      pointer-events: none;
+    }
+
+    /* 儀表板 Layout - 手機版固定為 1fr */
     .dashboard-layout {
       display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
+      grid-template-columns: 1fr;
       gap: 16px;
-      margin-bottom: 20px;
-    }
-
-    @media (max-width: 600px) {
-      .dashboard-layout {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .dashboard-layout .card {
-      margin-bottom: 0;
+      margin-bottom: 16px;
+      width: 100%;
     }
 
     /* 數據總覽 */
     .stats-container {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
     }
 
     .stat-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-bottom: 10px;
+      padding-bottom: 8px;
       border-bottom: 1px solid var(--ios-border);
     }
 
@@ -185,7 +224,7 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
     }
 
     .stat-value {
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 700;
       color: var(--ios-gold);
       font-family: 'Arial', sans-serif;
@@ -224,7 +263,7 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
     .chart-container {
       position: relative;
       width: 100%;
-      height: 230px;
+      height: 200px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -241,12 +280,13 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       background-color: var(--ios-card-secondary);
       border-radius: 12px;
       overflow: hidden;
+      border: 1px solid var(--ios-border);
     }
 
     .ios-form-row {
       display: flex;
       align-items: center;
-      padding: 12px 16px;
+      padding: 12px 14px;
       border-bottom: 1px solid var(--ios-border);
     }
 
@@ -256,7 +296,7 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
 
     .ios-form-row label {
       width: 110px;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 500;
       color: var(--ios-gray-light);
     }
@@ -266,10 +306,11 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       border: none;
       background: transparent;
       color: #ffffff;
-      font-size: 15px;
+      font-size: 14px;
       outline: none;
       text-align: right;
       font-family: inherit;
+      width: 100%;
     }
 
     .ios-form-row input[type="date"], .ios-form-row input[type="number"] {
@@ -282,15 +323,16 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
 
     /* 快捷輔助區 */
     .helper-section {
-      margin-top: 10px;
+      margin-top: 8px;
     }
 
     .helper-title {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--ios-gray-muted);
       margin-bottom: 6px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      font-weight: 600;
     }
 
     .quick-tags {
@@ -305,7 +347,7 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       color: var(--ios-gray-light);
       padding: 6px 12px;
       border-radius: 14px;
-      font-size: 13px;
+      font-size: 12px;
       cursor: pointer;
       transition: var(--transition-ios);
     }
@@ -321,7 +363,7 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       border: none;
       padding: 14px 20px;
       border-radius: 12px;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
       cursor: pointer;
       transition: var(--transition-ios);
@@ -329,35 +371,116 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       justify-content: center;
       align-items: center;
       gap: 8px;
-      box-shadow: 0 4px 12px rgba(255, 214, 10, 0.2);
+      box-shadow: 0 4px 12px rgba(255, 214, 10, 0.15);
+      margin-top: 8px;
     }
 
     .btn-submit:hover {
       background-color: var(--ios-gold-hover);
-      transform: translateY(-1px);
     }
 
-    /* 分類管理 */
+    /* iOS 經典分頁跳轉按鈕 */
+    .btn-navigation-row {
+      background-color: var(--ios-card);
+      border: 1px solid var(--ios-border);
+      color: #ffffff;
+      width: 100%;
+      padding: 16px;
+      border-radius: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-soft);
+      transition: var(--transition-ios);
+    }
+
+    .btn-navigation-row:hover {
+      background-color: var(--ios-card-secondary);
+    }
+
+    /* iOS 導覽列 Navbar (明細頁專用) */
+    .ios-navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--ios-border);
+      position: sticky;
+      top: 0;
+      background-color: var(--ios-bg);
+      z-index: 100;
+      width: 100%;
+    }
+
+    .navbar-back-btn {
+      background: none;
+      border: none;
+      color: var(--ios-blue);
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+    }
+
+    .navbar-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .navbar-action-btn {
+      background: none;
+      border: none;
+      color: var(--ios-gold);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+    }
+
+    /* 分類管理 (設定 Modal 專用) */
+    .modal-section-title {
+      font-size: 14px;
+      font-weight: 600;
+      border-top: 1px solid var(--ios-border);
+      padding-top: 15px;
+      margin-bottom: 10px;
+      color: var(--ios-gold);
+    }
+
     .category-scroll {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 16px;
-      max-height: 120px;
+      gap: 6px;
+      margin-bottom: 12px;
+      max-height: 100px;
       overflow-y: auto;
       padding: 4px;
+      background-color: rgba(0, 0, 0, 0.15);
+      border-radius: 6px;
     }
 
     .category-badge {
       background-color: var(--ios-card-secondary);
       border: 1px solid var(--ios-border);
       color: var(--ios-gray-light);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 13px;
+      padding: 4px 8px;
+      border-radius: 14px;
+      font-size: 11px;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
     }
 
     .category-badge button {
@@ -365,25 +488,34 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       border: none;
       color: var(--ios-danger);
       cursor: pointer;
-      font-size: 11px;
+      font-size: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
+    .add-category-input {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-add-cat {
+      background-color: var(--ios-card-secondary);
+      color: var(--ios-gray-light);
+      border: 1px solid var(--ios-border);
+      padding: 0 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
     /* 歷史記錄與篩選 */
     .filter-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr auto;
-      gap: 12px;
+      grid-template-columns: 1fr 1.2fr auto;
+      gap: 10px;
       margin-bottom: 16px;
       align-items: center;
-    }
-
-    @media (max-width: 500px) {
-      .filter-grid {
-        grid-template-columns: 1fr;
-      }
+      width: 100%;
     }
 
     .table-container {
@@ -391,19 +523,20 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       border: 1px solid var(--ios-border);
       border-radius: 12px;
       background-color: rgba(28, 28, 30, 0.7);
-      max-height: 400px;
+      max-height: 500px;
       margin-bottom: 16px;
+      width: 100%;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       text-align: left;
-      font-size: 14px;
+      font-size: 13px;
     }
 
     th, td {
-      padding: 12px 14px;
+      padding: 10px 12px;
       border-bottom: 1px solid var(--ios-border);
     }
 
@@ -425,15 +558,9 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       padding: 4px;
       background: transparent;
       width: 100%;
-      font-size: 14px;
+      font-size: 13px;
       color: #ffffff;
       font-family: inherit;
-    }
-
-    .table-input:focus {
-      background-color: var(--ios-card-secondary);
-      outline: 1px solid var(--ios-gold);
-      border-radius: 4px;
     }
 
     .btn-delete-row {
@@ -441,7 +568,7 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       border: none;
       color: var(--ios-danger);
       cursor: pointer;
-      font-size: 15px;
+      font-size: 14px;
       padding: 4px;
     }
 
@@ -449,25 +576,23 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       display: flex;
       justify-content: space-between;
       align-items: center;
+      width: 100%;
+      padding-top: 8px;
     }
 
     .btn-save-changes {
       background-color: var(--ios-blue);
       color: #ffffff;
       border: none;
-      padding: 10px 18px;
+      padding: 8px 16px;
       border-radius: 20px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 6px;
       transition: var(--transition-ios);
-    }
-
-    .btn-save-changes:hover {
-      opacity: 0.9;
     }
 
     /* iOS 彈出框 Modal */
@@ -497,17 +622,17 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       border: 1px solid var(--ios-border);
       border-radius: 14px;
       width: 90%;
-      max-width: 440px;
-      padding: 24px;
+      max-width: 360px;
+      padding: 20px;
       box-shadow: var(--shadow-soft);
       position: relative;
     }
 
     .modal-header {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 700;
       color: #ffffff;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -516,7 +641,7 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
     .modal-close {
       background: none;
       border: none;
-      font-size: 22px;
+      font-size: 20px;
       color: var(--ios-gray-muted);
       cursor: pointer;
     }
@@ -547,13 +672,13 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       background-color: var(--ios-card);
       border: 1px solid var(--ios-border);
       border-radius: 20px;
-      width: 150px;
-      height: 150px;
+      width: 140px;
+      height: 140px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       box-shadow: var(--shadow-soft);
       transform: scale(0.8);
       transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -564,8 +689,8 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
     }
 
     .checkmark-circle {
-      width: 56px;
-      height: 56px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
       display: block;
       stroke-width: 3;
@@ -594,7 +719,7 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
     }
 
     .success-text {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 600;
       color: #ffffff;
     }
@@ -625,8 +750,8 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       border: 3px solid rgba(255,255,255,0.05);
       border-left-color: var(--ios-gold);
       border-radius: 50%;
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
       animation: spin 0.8s linear infinite;
     }
 
@@ -644,17 +769,19 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       background-color: var(--ios-card);
       border: 1px solid var(--ios-border);
       color: #ffffff;
-      padding: 12px 24px;
+      padding: 10px 20px;
       border-radius: 24px;
       box-shadow: var(--shadow-soft);
       z-index: 3000;
       opacity: 0;
       transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 500;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      width: max-content;
+      max-width: 90%;
     }
 
     .toast.active {
@@ -689,7 +816,8 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
     <span>這是通知訊息</span>
   </div>
 
-  <div class="container">
+  <!-- 📱 主畫面視圖 (Main View) -->
+  <div id="mainView" class="container">
     <!-- Header -->
     <header>
       <div class="brand-title">
@@ -704,17 +832,19 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
     <div class="setup-alert" id="setupAlert" style="display: none;">
       <i class="fa-solid fa-circle-info"></i>
       <div>
-        <strong>尚未設定連線！</strong> 請點選右上角「設定」按鈕，輸入 Google Apps Script URL 與密碼以連接您的雲端試算表。
+        <strong>尚未設定連線！</strong> 請點選右上角「設定」按鈕，輸入 Google Apps Script URL 以連接您的雲端試算表。
       </div>
     </div>
 
-    <!-- Dashboard (儀表板) -->
-    <section class="dashboard-layout">
-      <!-- 數據總覽 -->
-      <div class="card">
-        <div class="card-title">
+    <!-- 可摺疊卡片：數據總覽 -->
+    <div class="card">
+      <div class="card-title collapsible" onclick="toggleCollapse('statsBody', 'statsArrow')">
+        <div class="card-title-left">
           <i class="fa-solid fa-gauge-high"></i> 用車支出總覽
         </div>
+        <i class="fa-solid fa-chevron-down collapse-arrow" id="statsArrow"></i>
+      </div>
+      <div class="card-body" id="statsBody">
         <div class="stats-container">
           <div class="stat-row">
             <div class="stat-label">本月用車支出</div>
@@ -744,25 +874,31 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- 分類分析圖表 -->
-      <div class="card">
-        <div class="card-title">
+    <!-- 可摺疊卡片：分類分析圖表 -->
+    <div class="card">
+      <div class="card-title collapsible" onclick="toggleCollapse('chartBody', 'chartArrow')">
+        <div class="card-title-left">
           <i class="fa-solid fa-chart-pie"></i> 支出分類佔比
         </div>
+        <i class="fa-solid fa-chevron-down collapse-arrow" id="chartArrow"></i>
+      </div>
+      <div class="card-body" id="chartBody">
         <div class="chart-container">
           <canvas id="categoryChart"></canvas>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- 輸入表單與分類管理 -->
-    <section class="dashboard-layout" style="grid-template-columns: 1.3fr 1fr;">
-      <!-- 新增支出 -->
-      <div class="card">
-        <div class="card-title">
+    <!-- 新增愛車花費 -->
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left">
           <i class="fa-solid fa-plus-circle"></i> 新增愛車花費
         </div>
+      </div>
+      <div class="card-body" style="display: block;">
         <form id="addExpenseForm" class="ios-form" onsubmit="handleAddExpense(event)">
           <div class="ios-input-group">
             <div class="ios-form-row">
@@ -804,7 +940,7 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
               <button type="button" class="quick-tag-btn" onclick="quickFillNote('95加滿', '加油')">⛽ 95加滿</button>
               <button type="button" class="quick-tag-btn" onclick="quickFillNote('98加滿', '加油')">⛽ 98加滿</button>
               <button type="button" class="quick-tag-btn" onclick="quickFillNote('自助洗車', '洗車/美容')">🧽 自助洗車</button>
-              <button type="button" class="quick-tag-btn" onclick="quickFillNote('eTag儲值', '停車/路費')">🛣️ eTag儲值</button>
+              <button type="button" class="quick-tag-btn" onclick="quickFillNote('eTag儲值', '停車/路費')">公路 eTag</button>
               <button type="button" class="quick-tag-btn" onclick="quickFillNote('定期保養', '保養')">🔧 定期保養</button>
               <button type="button" class="quick-tag-btn" onclick="quickFillNote('路邊停車', '停車/路費')">🅿️ 路邊停車</button>
             </div>
@@ -815,79 +951,75 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
           </button>
         </form>
       </div>
+    </div>
 
-      <!-- 分類管理 -->
-      <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
-        <div>
-          <div class="card-title">
-            <i class="fa-solid fa-tags"></i> 類別設定
-          </div>
-          <div class="category-scroll" id="categoryListContainer">
-            <div style="color: var(--ios-gray-muted); font-size:13px; padding: 4px;">載入中...</div>
-          </div>
-        </div>
-        <div class="add-category-input">
-          <input type="text" id="newCategoryInput" placeholder="新分類名稱" style="padding: 8px 12px;">
-          <button class="btn-add-cat" onclick="handleAddCategory()" style="padding: 8px 12px; font-weight:600;">新增</button>
-        </div>
-      </div>
-    </section>
+    <!-- 🍎 iOS 經典跳轉按鈕：進入明細頁 -->
+    <button class="btn-navigation-row" onclick="switchView('detailView')">
+      <span><i class="fa-solid fa-list-ul" style="color: var(--ios-gold); margin-right: 8px;"></i> 查看用車花費明細</span>
+      <i class="fa-solid fa-chevron-right" style="color: var(--ios-gray-muted); font-size: 13px;"></i>
+    </button>
+  </div>
 
-    <!-- 歷史支出查詢與編輯 -->
-    <section class="card">
-      <div class="card-title" style="justify-content: space-between; width: 100%;">
-        <span><i class="fa-solid fa-list-ul"></i> 用車花費明細</span>
-        <button class="btn-settings" onclick="exportToCSV()" style="padding: 6px 12px; font-size:12px; border-radius: 12px;">
-          <i class="fa-solid fa-file-export"></i> 匯出 CSV
-        </button>
-      </div>
-      
-      <!-- 篩選器 -->
+  <!-- 📱 明細花費視圖 (Detail View - 獨立成另一頁) -->
+  <div id="detailView" class="container" style="display: none;">
+    <!-- iOS Navbar -->
+    <div class="ios-navbar">
+      <button class="navbar-back-btn" onclick="switchView('mainView')">
+        <i class="fa-solid fa-chevron-left"></i> 返回
+      </button>
+      <div class="navbar-title">花費明細</div>
+      <button class="navbar-action-btn" onclick="exportToCSV()">
+        <i class="fa-solid fa-file-export"></i> 匯出
+      </button>
+    </div>
+
+    <!-- 篩選面板 -->
+    <div class="card" style="padding: 14px; margin-bottom: 12px;">
       <div class="filter-grid">
         <select id="filterCategory" onchange="applyFilters()">
           <option value="ALL">全部分類</option>
         </select>
         <input type="text" id="filterKeyword" placeholder="關鍵字搜尋（含里程）..." oninput="applyFilters()">
-        <button class="btn-settings" onclick="resetFilters()" style="padding: 10px 14px;">
+        <button class="btn-settings" onclick="resetFilters()" style="padding: 8px 12px;">
           <i class="fa-solid fa-rotate-left"></i>
         </button>
       </div>
+    </div>
 
-      <!-- 表格 -->
-      <div class="table-container">
-        <table id="expenseTable">
-          <thead>
-            <tr>
-              <th style="width: 25%">日期</th>
-              <th style="width: 22%">類別</th>
-              <th style="width: 20%">金額</th>
-              <th style="width: 25%">里程 & 備註</th>
-              <th style="width: 8%; text-align: center;"></th>
-            </tr>
-          </thead>
-          <tbody id="expenseTableBody">
-            <tr>
-              <td colspan="5" style="text-align: center; color: var(--ios-gray-muted); padding: 20px;">
-                請完成設定以載入明細
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <!-- 明細資料表格 (純文字唯讀化，點選行會彈出編輯對話框) -->
+    <div class="table-container">
+      <table id="expenseTable">
+        <thead>
+          <tr>
+            <th style="width: 18%">日期</th>
+            <th style="width: 22%">類別</th>
+            <th style="width: 18%">金額</th>
+            <th style="width: 34%">里程 & 備註</th>
+            <th style="width: 8%; text-align: center;"></th>
+          </tr>
+        </thead>
+        <tbody id="expenseTableBody">
+          <tr>
+            <td colspan="5" style="text-align: center; color: var(--ios-gray-muted); padding: 20px;">
+              載入明細中...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-      <!-- 表格操作 -->
-      <div class="table-footer">
-        <span style="font-size: 14px; font-weight: 600; color: var(--ios-gold); font-family: 'Arial', sans-serif;" id="filteredTotalText">
-          篩選小計: $0 (0 筆)
-        </span>
-        <button class="btn-save-changes" id="btnSaveChanges" onclick="handleSaveChanges()" style="display: none;">
-          <i class="fa-solid fa-cloud-arrow-up"></i> 儲存所有變更
-        </button>
-      </div>
-    </section>
+    <!-- 底部操作列 -->
+    <div class="table-footer">
+      <span style="font-size: 13px; font-weight: 600; color: var(--ios-gold); font-family: 'Arial', sans-serif;" id="filteredTotalText">
+        篩選小計: $0 (0 筆)
+      </span>
+      <button class="btn-save-changes" id="btnSaveChanges" onclick="handleSaveChanges()" style="display: none;">
+        <i class="fa-solid fa-cloud-arrow-up"></i> 儲存變更
+      </button>
+    </div>
   </div>
 
-  <!-- 連線設定 Modal -->
+  <!-- 連線與系統設定 Modal (包含類別設定在內) -->
   <div class="modal-overlay" id="settingsModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -910,9 +1042,19 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
             <input type="number" id="cfgBudget" placeholder="預設 15,000">
           </div>
         </div>
+
+        <!-- 🏷️ 類別設定區塊 (移植到設定面板內) -->
+        <div class="modal-section-title">🏷️ 類別設定</div>
+        <div class="category-scroll" id="categoryListContainer">
+          <div style="color: var(--ios-gray-muted); font-size:11px; padding: 4px;">載入中...</div>
+        </div>
+        <div class="add-category-input" style="margin-bottom: 10px;">
+          <input type="text" id="newCategoryInput" placeholder="新類別名稱" style="padding: 6px 10px; font-size:13px; text-align:left;">
+          <button class="btn-add-cat" onclick="handleAddCategory()" style="padding: 6px 12px; font-weight:600; font-size:12px;">新增</button>
+        </div>
         
-        <!-- 💡 錯誤提示容器 -->
-        <div id="settingsErrorMsg" style="color: var(--ios-danger); font-size: 12px; margin-top: 5px; display: none; text-align: left; line-height: 1.4;"></div>
+        <!-- 錯誤提示容器 -->
+        <div id="settingsErrorMsg" style="color: var(--ios-danger); font-size: 11px; display: none; text-align: left; line-height: 1.4;"></div>
         
         <button class="btn-submit" onclick="saveSettings()">
           <i class="fa-solid fa-circle-check"></i> 儲存並同步資料
@@ -921,8 +1063,49 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
     </div>
   </div>
 
+  <!-- 📝 編輯記錄對話框 Modal -->
+  <div class="modal-overlay" id="editRecordModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span>📝 編輯花費明細</span>
+        <button class="modal-close" onclick="closeEditRecordModal()">&times;</button>
+      </div>
+      
+      <div class="ios-form" style="gap: 16px;">
+        <div class="ios-input-group">
+          <div class="ios-form-row">
+            <label for="editExpDate">日期</label>
+            <input type="date" id="editExpDate" required>
+          </div>
+          <div class="ios-form-row">
+            <label for="editExpCategory">支出分類</label>
+            <select id="editExpCategory" required></select>
+          </div>
+          <div class="ios-form-row">
+            <label for="editExpAmount">金額</label>
+            <input type="number" id="editExpAmount" min="1" step="1" required>
+          </div>
+          <div class="ios-form-row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+            <label style="width: 100%;">備註與里程</label>
+            <input type="text" id="editExpNote" placeholder="例如：[125000 km] 95加滿" style="text-align: left; width: 100%;">
+          </div>
+        </div>
+        
+        <input type="hidden" id="editExpRowNum">
+        
+        <button class="btn-submit" onclick="saveEditedRecord()" style="background-color: var(--ios-blue); color: #ffffff; box-shadow: none;">
+          <i class="fa-solid fa-circle-check"></i> 確定修改
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- JavaScript 程式邏輯 -->
   <script>
+    // ⚙️ 系統預設設定（可選：在此直接填入，手機開啟時就不必每次都輸入了）
+    const DEFAULT_GAS_API_URL = "https://script.google.com/macros/s/AKfycbylySu_I6LuC70k56RszCjE9iO99r89R-Z4d9xOvxI0eY2Xmws/exec"; 
+    const DEFAULT_API_TOKEN = "";   // 👈 您可以直接將您的 Token 密碼貼在此雙引號中
+
     let rawExpenses = [];      // 試算表原始支出資料
     let categoriesList = [];    // 分類
     let chartInstance = null;   // Chart 實例
@@ -946,13 +1129,17 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       }
       document.getElementById('cfgBudget').value = savedBudget;
 
-      // 載入 API 連線設定
-      const apiUrl = localStorage.getItem('gas_api_url');
-      const apiToken = localStorage.getItem('gas_api_token');
+      // 載入 API 連線與預設設定優先權
+      const apiUrl = localStorage.getItem('gas_api_url') || DEFAULT_GAS_API_URL;
+      const apiToken = localStorage.getItem('gas_api_token') || DEFAULT_API_TOKEN;
       
       if (apiUrl && apiToken) {
         document.getElementById('cfgApiUrl').value = apiUrl;
         document.getElementById('cfgToken').value = apiToken;
+        
+        if (!localStorage.getItem('gas_api_url')) localStorage.setItem('gas_api_url', apiUrl);
+        if (!localStorage.getItem('gas_api_token')) localStorage.setItem('gas_api_token', apiToken);
+
         loadDataFromSheet();
       } else {
         document.getElementById('setupAlert').style.display = 'flex';
@@ -995,11 +1182,34 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
 
     function closeSettingsModal() {
       document.getElementById('settingsModal').classList.remove('active');
-      // 關閉時清除紅字錯誤
       document.getElementById('settingsErrorMsg').style.display = 'none';
     }
 
-    // 儲存連線與預算設定（點選後直接測試連線，成功才關閉）
+    // SPA 頁面切換邏輯
+    function switchView(viewId) {
+      if (viewId === 'mainView') {
+        document.getElementById('mainView').style.display = 'block';
+        document.getElementById('detailView').style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        loadDataFromSheet(); 
+      } else {
+        document.getElementById('mainView').style.display = 'none';
+        document.getElementById('detailView').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        applyFilters(); 
+      }
+    }
+
+    // 卡片展開與收回摺疊控制
+    function toggleCollapse(bodyId, arrowId) {
+      const body = document.getElementById(bodyId);
+      const arrow = document.getElementById(arrowId);
+      
+      body.classList.toggle('collapsed');
+      arrow.classList.toggle('collapsed');
+    }
+
+    // 儲存連線與預算設定
     async function saveSettings() {
       const url = document.getElementById('cfgApiUrl').value.trim();
       const token = document.getElementById('cfgToken').value.trim();
@@ -1016,7 +1226,6 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       showLoading(true);
 
       try {
-        // 發送測試請求
         const fetchUrl = `${url}?token=${encodeURIComponent(token)}&action=getData`;
         const response = await fetch(fetchUrl);
         
@@ -1027,7 +1236,6 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
         const result = await response.json();
 
         if (result.status === "success") {
-          // 成功後才寫入 LocalStorage
           localStorage.setItem('gas_api_url', url);
           localStorage.setItem('gas_api_token', token);
           if (budget && Number(budget) > 0) {
@@ -1039,7 +1247,6 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
           wasModified = false;
           document.getElementById('btnSaveChanges').style.display = 'none';
 
-          // 更新 UI
           updateCategoriesDropdown();
           updateCategoriesBadges();
           updateDashboardStats();
@@ -1076,21 +1283,19 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
     // 快捷鍵邏輯：填寫常用備註並自動配對分類
     function quickFillNote(noteText, defaultCategory) {
       document.getElementById('expNote').value = noteText;
-      
-      // 自動匹配對應的分類（如果存在於分類清單中）
       if (categoriesList.includes(defaultCategory)) {
         document.getElementById('expCategory').value = defaultCategory;
       }
     }
 
-    // 💡 輔助函數：從備註字串中 Regex 解析里程 Km
+    // 輔助函數：從備註字串中 Regex 解析里程 Km
     function extractMileage(note) {
       if (!note) return null;
       const match = note.match(/(\d+)\s*(?:km|公里)/i);
       return match ? Number(match[1]) : null;
     }
 
-    // 從 Google Sheets 載入資料 (GET) - 背景同步，若失敗會警告但不要重演 close/open 動態
+    // 從 Google Sheets 載入資料 (GET)
     async function loadDataFromSheet() {
       const apiUrl = localStorage.getItem('gas_api_url');
       const apiToken = localStorage.getItem('gas_api_token');
@@ -1110,7 +1315,6 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
           wasModified = false;
           document.getElementById('btnSaveChanges').style.display = 'none';
 
-          // 更新 UI
           updateCategoriesDropdown();
           updateCategoriesBadges();
           updateDashboardStats();
@@ -1163,13 +1367,13 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       });
     }
 
-    // 更新類別 Badge 清單
+    // 更新類別 Badge 清單 (設定面板內部)
     function updateCategoriesBadges() {
       const container = document.getElementById('categoryListContainer');
       container.innerHTML = "";
 
       if (categoriesList.length === 0) {
-        container.innerHTML = '<div style="color: var(--ios-gray-muted); font-size:13px; padding: 4px;">尚未配置類別</div>';
+        container.innerHTML = '<div style="color: var(--ios-gray-muted); font-size:11px; padding: 4px;">尚未配置類別</div>';
         return;
       }
 
@@ -1191,10 +1395,8 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       const now = new Date();
       const currentYear = now.getFullYear();
       const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
-      const todayStr = now.toISOString().split('T')[0];
 
       let monthTotal = 0;
-      let dayTotal = 0;
       let historyTotal = 0;
       
       let maxMileage = 0;           // 目前最新里程
@@ -1204,10 +1406,7 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
         const amount = Number(exp.amount) || 0;
         historyTotal += amount;
 
-        // 計算本日與本月總額
-        if (exp.date === todayStr) {
-          dayTotal += amount;
-        }
+        // 計算本月總額
         if (exp.date && exp.date.startsWith(`${currentYear}-${currentMonth}`)) {
           monthTotal += amount;
         }
@@ -1233,9 +1432,8 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
         }
       });
 
-      // 1. 填入本月、今日與歷史花費
+      // 1. 填入本月與歷史花費
       document.getElementById('monthTotalText').textContent = `$${monthTotal.toLocaleString()}`;
-      document.getElementById('dayTotalText').textContent = `$${dayTotal.toLocaleString()}`;
       document.getElementById('historyTotalText').textContent = `$${historyTotal.toLocaleString()}`;
 
       // 2. 填入目前最新里程
@@ -1246,7 +1444,6 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       }
 
       // 3. 試算平均每公里油資花費
-      // 按里程從小到大排序 (時間順序)
       fuelRecords.sort((a, b) => a.mileage - b.mileage);
       
       if (fuelRecords.length >= 2) {
@@ -1276,11 +1473,10 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       fillBar.style.width = `${budgetPct}%`;
       document.getElementById('budgetPctText').textContent = `${budgetPct}%`;
 
-      // 預算超額視覺警告
       if (budgetPct >= 90) {
         fillBar.style.backgroundColor = 'var(--ios-danger)';
       } else if (budgetPct >= 75) {
-        fillBar.style.backgroundColor = '#ff9f0a'; // 橘色
+        fillBar.style.backgroundColor = '#ff9f0a';
       } else {
         fillBar.style.backgroundColor = 'var(--ios-gold)';
       }
@@ -1322,7 +1518,6 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
         return;
       }
 
-      // Apple Style 暗色系統調色盤
       const colorPalette = [
         '#0a84ff', // 藍
         '#ffd60a', // 金
@@ -1377,7 +1572,7 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       });
     }
 
-    // 填充支出明細表格
+    // 💡 填充支出明細表格 - 按年份 GroupBy & MM/DD 顯示 & 列點擊彈出編輯視窗
     function populateExpenseTable(data) {
       const tbody = document.getElementById('expenseTableBody');
       tbody.innerHTML = "";
@@ -1390,28 +1585,43 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
 
       // 由近到遠排序
       const sortedData = [...data].sort((a, b) => new Date(b.date) - new Date(a.date));
+      let lastYear = null;
       let totalFiltered = 0;
 
       sortedData.forEach(exp => {
         totalFiltered += Number(exp.amount) || 0;
         
+        // 格式化日期：拆分出年份與月/日
+        const expDate = new Date(exp.date);
+        const year = expDate.getFullYear() || new Date().getFullYear();
+        const month = String(expDate.getMonth() + 1).padStart(2, '0');
+        const day = String(expDate.getDate()).padStart(2, '0');
+        const mmdd = `${month}/${day}`; // 改成 02/06 樣式
+
+        // 💡 1. 插入年份分組列
+        if (year !== lastYear) {
+          lastYear = year;
+          const groupTr = document.createElement('tr');
+          groupTr.className = 'year-group-row';
+          groupTr.innerHTML = `
+            <td colspan="5" style="background-color: #121214; font-weight: 700; color: var(--ios-gold); padding: 6px 12px; font-size: 13px;">
+              📅 ${year} 年
+            </td>
+          `;
+          tbody.appendChild(groupTr);
+        }
+
+        // 💡 2. 建立資料列 (純文字、點擊行任意處編輯)
         const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.setAttribute('onclick', `event.target.closest('.btn-delete-row') ? null : openEditRecordModal(${exp.rowNum})`);
+        
         tr.innerHTML = `
-          <td>
-            <input type="date" class="table-input" value="${exp.date}" onchange="updateRowValue(${exp.rowNum}, 'date', this.value)">
-          </td>
-          <td>
-            <select class="table-input" onchange="updateRowValue(${exp.rowNum}, 'category', this.value)">
-              ${categoriesList.map(cat => `<option value="${cat}" ${cat === exp.category ? 'selected' : ''}>${cat}</option>`).join('')}
-            </select>
-          </td>
-          <td>
-            <input type="number" class="table-input" value="${exp.amount}" onchange="updateRowValue(${exp.rowNum}, 'amount', this.value)" style="font-weight:600; color: var(--ios-gold);">
-          </td>
-          <td>
-            <input type="text" class="table-input" value="${escapeHtml(exp.note)}" onchange="updateRowValue(${exp.rowNum}, 'note', this.value)">
-          </td>
-          <td style="text-align:center;">
+          <td style="font-family: 'Arial', sans-serif; color: var(--ios-gray-light); font-weight: 500;">${mmdd}</td>
+          <td style="color: var(--ios-gray-light); font-weight: 500;">${escapeHtml(exp.category)}</td>
+          <td style="font-family: 'Arial', sans-serif; font-weight: 700; color: var(--ios-gold);">$${exp.amount.toLocaleString()}</td>
+          <td style="color: var(--ios-gray-muted); font-size: 12px; word-break: break-all;">${escapeHtml(exp.note)}</td>
+          <td style="text-align:center; padding: 4px;">
             <button class="btn-delete-row" onclick="handleDeleteRow(${exp.rowNum})" title="刪除">
               <i class="fa-solid fa-trash-can"></i>
             </button>
@@ -1423,7 +1633,68 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
       document.getElementById('filteredTotalText').textContent = `篩選小計: $${totalFiltered.toLocaleString()} (${data.length} 筆)`;
     }
 
-    // 編輯欄位更新值
+    // 💡 彈出編輯花費記錄 Modal
+    function openEditRecordModal(rowNum) {
+      const index = rawExpenses.findIndex(exp => exp.rowNum === rowNum);
+      if (index === -1) return;
+      const exp = rawExpenses[index];
+
+      document.getElementById('editExpRowNum').value = rowNum;
+      document.getElementById('editExpDate').value = exp.date;
+      document.getElementById('editExpAmount').value = exp.amount;
+      document.getElementById('editExpNote').value = exp.note;
+
+      // 填充編輯分類下拉選單
+      const select = document.getElementById('editExpCategory');
+      select.innerHTML = "";
+      categoriesList.forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat;
+        opt.textContent = cat;
+        if (cat === exp.category) opt.selected = true;
+        select.appendChild(opt);
+      });
+
+      document.getElementById('editRecordModal').classList.add('active');
+    }
+
+    function closeEditRecordModal() {
+      document.getElementById('editRecordModal').classList.remove('active');
+    }
+
+    // 確定修改儲存
+    function saveEditedRecord() {
+      const rowNum = Number(document.getElementById('editExpRowNum').value);
+      const date = document.getElementById('editExpDate').value;
+      const category = document.getElementById('editExpCategory').value;
+      const amount = Number(document.getElementById('editExpAmount').value) || 0;
+      const note = document.getElementById('editExpNote').value.trim();
+
+      if (amount <= 0) {
+        alert("金額需大於 0");
+        return;
+      }
+
+      const index = rawExpenses.findIndex(exp => exp.rowNum === rowNum);
+      if (index !== -1) {
+        rawExpenses[index].date = date;
+        rawExpenses[index].category = category;
+        rawExpenses[index].amount = amount;
+        rawExpenses[index].note = note;
+
+        wasModified = true;
+        document.getElementById('btnSaveChanges').style.display = 'block';
+
+        closeEditRecordModal();
+        
+        // 更新統計、圖表並重新過濾填表
+        updateDashboardStats();
+        renderChart();
+        applyFilters();
+      }
+    }
+
+    // 編輯欄位更新值 (表格內直接呼叫，目前主要供刪除或特殊異動)
     function updateRowValue(rowNum, field, value) {
       wasModified = true;
       document.getElementById('btnSaveChanges').style.display = 'block';
@@ -1443,14 +1714,13 @@ Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復�
 
     // 刪除表格列
     function handleDeleteRow(rowNum) {
-      if (!confirm("確定要刪除這筆支出嗎？需要點選『儲存所有變更』才會同步至試算表。")) return;
+      if (!confirm("確定要刪除這筆支出嗎？需要點選『儲存變更』才會同步至試算表。")) return;
       
       wasModified = true;
       document.getElementById('btnSaveChanges').style.display = 'block';
 
       rawExpenses = rawExpenses.filter(exp => exp.rowNum !== rowNum);
       
-      // 重建行號
       rawExpenses.forEach((exp, idx) => {
         exp.rowNum = idx + 2;
       });

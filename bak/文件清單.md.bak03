@@ -1,4 +1,4 @@
-<!-- Version: v1.2 | Description: 更新專案文件清單.md，記錄專案所有檔案之核心內容、最近異動時間與關聯日誌。 -->
+<!-- Version: v1.0 | Description: 新增專案文件清單.md，記錄專案所有檔案之核心內容、最近異動時間與關聯日誌。 -->
 # 愛車支出記錄系統：專案文件清單
 
 本專案是一個將用車支出（加油、保養、停車、稅費等）直接由前端 `index.html` 透過 Google Apps Script (GAS) API 送往 Google Sheets 試算表的車主專屬記帳系統。前端介面採用 Apple iOS 暗色風格設計。
@@ -6,21 +6,15 @@
 ## 🗃️ 檔案目錄與最近狀態
 | 檔案名稱 | 核心內容說明 | 最近異動時間 | 關聯日誌編號 |
 | :--- | :--- | :--- | :--- |
-| [index.html](file:///Users/kas/Documents/PythonProject/Expense_tracker/index.html) | 主前端網頁，包含 Apple SPA 跨頁明細、摺疊卡片與 GAS API 串接邏輯。v3.2 新增展示模式 (Demo Mode) | 2026-07-30 | [20260730_01.md](file:///Users/kas/Documents/PythonProject/Expense_tracker/日誌/20260730_01.md) |
+| [index.html](file:///Users/kas/Documents/PythonProject/Expense_tracker/index.html) | 主前端網頁，包含 Apple SPA 跨頁明細、摺疊卡片與 GAS API 串接邏輯 (v3.1) | 2026-07-07 | [20260707_01.md](file:///Users/kas/Documents/PythonProject/Expense_tracker/日誌/20260707_01.md) |
 | [README.md](file:///Users/kas/Documents/PythonProject/Expense_tracker/README.md) | 新版專案說明與操作指南文件 | 2026-07-07 | [20260707_01.md](file:///Users/kas/Documents/PythonProject/Expense_tracker/日誌/20260707_01.md) |
-| [presentation/](file:///Volumes/AI_SSD/AI_agent/antigravity/HRV_Expense_tracker/presentation/) | 演示稿子專案目錄，已部署上 GCP GCS 靜態託管 (`gs://portfolio-kas-use-pi/expense-tracker-presentation/`) | 2026-08-01 | [20260801_01.md](file:///Volumes/AI_SSD/AI_agent/antigravity/HRV_Expense_tracker/日誌/20260801_01.md) |
-| [日誌/20260801_01.md](file:///Volumes/AI_SSD/AI_agent/antigravity/HRV_Expense_tracker/日誌/20260801_01.md) | 簡報部署至 GCS 存儲桶代管開發日誌，詳述 IAM 公開權限、CORS 設定與 Token 費用估算 | 2026-08-01 | [20260801_01.md](file:///Volumes/AI_SSD/AI_agent/antigravity/HRV_Expense_tracker/日誌/20260801_01.md) |
-| [日誌/20260731_01.md](file:///Volumes/AI_SSD/AI_agent/antigravity/HRV_Expense_tracker/日誌/20260731_01.md) | 簡報專案迭代優化日誌，詳述日文 TTS 分句生成與 FFmpeg 合併、母子屏與字幕排版重構、16:9 自適應 | 2026-07-31 | [20260731_01.md](file:///Volumes/AI_SSD/AI_agent/antigravity/HRV_Expense_tracker/日誌/20260731_01.md) |
-| [日誌/20260730_01.md](file:///Volumes/AI_SSD/AI_agent/antigravity/HRV_Expense_tracker/日誌/20260730_01.md) | 演示稿開發日誌，詳述 TTS 語音生成、漫畫風格插圖、iframe 自動演示邏輯與 index.html v3.2 更新 | 2026-07-30 | [20260730_01.md](file:///Volumes/AI_SSD/AI_agent/antigravity/HRV_Expense_tracker/日誌/20260730_01.md) |
-| [日誌/20260707_01.md](file:///Volumes/AI_SSD/AI_agent/antigravity/HRV_Expense_tracker/日誌/20260707_01.md) | 重構 GCS 部署、iOS 跨頁排版、年份分組與編輯對話框實作日誌 | 2026-07-07 | [20260707_01.md](file:///Volumes/AI_SSD/AI_agent/antigravity/HRV_Expense_tracker/日誌/20260707_01.md) |
-| [凍結記錄.md](file:///Volumes/AI_SSD/AI_agent/antigravity/HRV_Expense_tracker/凍結記錄.md) | 專案設計架構與關鍵決策鎖定紀錄 | 2026-08-01 | [20260801_01.md](file:///Volumes/AI_SSD/AI_agent/antigravity/HRV_Expense_tracker/日誌/20260801_01.md) |
-| [bak/](file:///Volumes/AI_SSD/AI_agent/antigravity/HRV_Expense_tracker/bak/) | 網頁歷史版本備份目錄（最多保留 3 代輪替備份） | 2026-07-31 | [20260731_01.md](file:///Volumes/AI_SSD/AI_agent/antigravity/HRV_Expense_tracker/日誌/20260731_01.md) |
+| [日誌/20260707_01.md](file:///Users/kas/Documents/PythonProject/Expense_tracker/日誌/20260707_01.md) | 重構 GCS 部署、iOS 跨頁排版、年份分組與編輯對話框實作日誌 | 2026-07-07 | [20260707_01.md](file:///Users/kas/Documents/PythonProject/Expense_tracker/日誌/20260707_01.md) |
+| [凍結記錄.md](file:///Users/kas/Documents/PythonProject/Expense_tracker/凍結記錄.md) | 專案設計架構與關鍵決策鎖定紀錄 | 2026-07-07 | [20260707_01.md](file:///Users/kas/Documents/PythonProject/Expense_tracker/日誌/20260707_01.md) |
+| [bak/](file:///Users/kas/Documents/PythonProject/Expense_tracker/bak/) | 網頁歷史版本備份目錄（最多保留 3 代輪替備份） | 2026-07-07 | [20260707_01.md](file:///Users/kas/Documents/PythonProject/Expense_tracker/日誌/20260707_01.md) |
 
 ## 🌐 專案外部連接與部署配置
-- **簡報 GCS 託管平台**：Google Cloud Storage (GCS)（儲存桶 `gs://portfolio-kas-use-pi/`，區域：`asia-east1` 台灣）
-- **簡報公開網址**：https://storage.googleapis.com/portfolio-kas-use-pi/expense-tracker-presentation/index.html
-- **記帳系統託管平台**：Google Cloud Storage (GCS)（儲存桶 `car-expense-asd`）
-- **記帳系統公開網址**：https://storage.googleapis.com/car-expense-asd/index.html
+- **當前網頁託管平台**：Google Cloud Storage (GCS)（公開儲存桶 `car-expense-asd`）
+- **公開網址**：https://storage.googleapis.com/car-expense-asd/index.html
 - **後端留言資料庫**：Google Sheets 試算表（透過 GAS Web App API 存取）
 - **資安防禦規則**：
   1. 不得在前端程式碼中公開 Google Sheets 試算表 ID。

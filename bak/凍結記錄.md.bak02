@@ -1,9 +1,26 @@
-<!-- Version: v1.0 | Description: 新增凍結記錄.md，鎖定專案的核心技術決策與隱私原則，防止資訊漂移。 -->
+<!-- Version: v1.3 | Description: 更新凍結記錄.md，追加 20260801_02 測試資產防護規範鎖定紀錄。 -->
 # 愛車支出記錄：決策凍結記錄
 
 本文件記錄專案中所有已被鎖定（Freeze）不容推翻的技術決策、隱私防護原則，以及決策的變更軌跡。
 
 ## ⏳ 凍結歷史時間軸
+
+- **2026-08-01** (關聯日誌：[20260801_02.md](file:///Volumes/AI_SSD/AI_agent/antigravity/HRV_Expense_tracker/日誌/20260801_02.md))
+  - 🔒 **測試資產隔離防護凍結**：正式寫入 `.agents/AGENTS.md` 第 4 節規範。所有 TTS 試聽檔、實驗性媒體一律強制隔離於 `.tmp/` 或 scratch 目錄，並由 AI 於對話結束前主動執行清理，搭配 `.gitignore` 雙重防止測試垃圾污染根目錄與 Git 遠端。
+
+- **2026-08-01** (關聯日誌：[20260801_01.md](file:///Volumes/AI_SSD/AI_agent/antigravity/HRV_Expense_tracker/日誌/20260801_01.md))
+  - 🔒 **GCS 簡報靜態託管凍結**：雙語漫畫風演示簡報子專案獨立託管於 GCS 存儲桶 `gs://portfolio-kas-use-pi/`（區域：`asia-east1` 台灣）下的 `expense-tracker-presentation/` 子目錄，設定 `allUsers:objectViewer` 公開存取與完整 CORS 政策。
+
+- **2026-07-31** (關聯日誌：[20260731_01.md](file:///Volumes/AI_SSD/AI_agent/antigravity/HRV_Expense_tracker/日誌/20260731_01.md))
+  - 🔒 **畫面縮放自適應凍結**：簡報根元素 `#root` 解析度鎖定於 `1920x1080` (16:9 YouTube 比例)，在前端利用 CSS `transform: scale()` 以及 window resize 監聽器動態置中等比例縮放，保證自適應與渲染品質。
+  - 🔒 **雙語音軌與字幕切換凍結**：簡報內置中日雙語 Toggle 控制，動態切換加載音訊軌及字幕陣列，利用短句 TTS (小於30字) 與 FFmpeg 合併技術躲過 Kokoro-82M 日文 model 的 token 上限崩潰 bug。
+  - 🔒 **母子屏子展懸浮凍結**：Slide 2 & 3 將手機 iframe 容器從一半空間改為右下角以 `absolute` 懸浮的微縮 iPhone 子分鏡 (畫中畫)，背景滿版漫畫插圖，大幅提升漫畫風畫面的張力。
+  - 🔒 **字幕一體化融入凍結**：字幕條不再獨立分割下方空間，改為絕對定位於畫面最底部中央的半透明黑底白字容器，符合現代 YouTube 影片及電影播放的視覺習慣。
+
+- **2026-07-30** (關聯日誌：[20260730_01.md](file:///Users/kas/Documents/PythonProject/Expense_tracker/日誌/20260730_01.md))
+  - 🔒 **簡報框架凍結**：簡報採用 HeyGen 的 Hyperframes 代碼影片框架，設定 1920x1080 解析度，並藉由 GSAP 做 timeline 精密控制。
+  - 🔒 **簡報演示機制凍結**：由於環境限制，操作影片以 iframe 原生內嵌網頁替代，利用 GSAP 時間軸 update 監聽器與 iframe 中的 DOM 自動化腳本在指定時間同步演繹，確保在倒帶、 Seek 時能保證高精度的狀態同步。
+  - 🔒 **記帳展示模式凍結**：`index.html` 內嵌本地 "demo" 展示模式，以 mock 數據避免連線 GAS 失敗對簡報產生的不良影響。
 
 - **2026-07-07** (關聯日誌：[20260707_01.md](file:///Users/kas/Documents/PythonProject/Expense_tracker/日誌/20260707_01.md))
   - 🔒 **架構凍結**：系統完全改寫為「前端 HTML + Google Apps Script (GAS)」直連模式，拋棄原本的 Streamlit/Python 本端伺服器架構。
