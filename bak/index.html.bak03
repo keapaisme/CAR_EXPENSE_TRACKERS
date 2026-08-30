@@ -1,0 +1,1721 @@
+<!--
+Version: v2.2
+Description: 個人支出記錄系統純前端網頁。升級至 v2.2，修復設定畫面反覆彈出的 UX 問題。現在若連線或同步失敗，設定視窗將保持開啟並直接在視窗內顯示詳細的錯誤排查指引，避免無窮彈出。
+-->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🚗 愛車支出記錄系統</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <style>
+    :root {
+      --ios-bg: #000000;             /* iOS 暗色模式純黑底色 */
+      --ios-card: #1c1c1e;           /* iOS 經典卡片背景 */
+      --ios-card-secondary: #2c2c2e; /* iOS 次級卡片/輸入框背景 */
+      --ios-blue: #0a84ff;           /* Apple 經典藍 */
+      --ios-gold: #ffd60a;           /* Apple 金色：強調與按鈕 */
+      --ios-gold-hover: #ffcc00;     
+      --ios-gray-light: #f2f2f7;     /* 亮文字 */
+      --ios-gray-muted: #8e8e93;     /* 輔助灰 */
+      --ios-border: #38383a;         /* 極細分隔線 */
+      --ios-danger: #ff453a;         /* 警示紅 */
+      --ios-success: #30d158;        /* 成功綠 */
+      
+      --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.5);
+      --transition-ios: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "SF Pro Text", "Segoe UI", "PingFang TC", "Microsoft JhengHei", Arial, sans-serif;
+      background-color: var(--ios-bg);
+      color: var(--ios-gray-light);
+      line-height: 1.5;
+      padding-bottom: 80px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 0 16px 0;
+      margin-bottom: 20px;
+    }
+
+    .brand-title {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-title i {
+      color: var(--ios-gold);
+    }
+
+    .btn-settings {
+      background-color: var(--ios-card);
+      color: var(--ios-gray-light);
+      border: 1px solid var(--ios-border);
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: var(--transition-ios);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-settings:hover {
+      background-color: var(--ios-card-secondary);
+    }
+
+    /* Setup Alert */
+    .setup-alert {
+      background-color: rgba(255, 69, 58, 0.15);
+      border: 1px solid var(--ios-danger);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      color: #ff9f0a;
+    }
+
+    .setup-alert i {
+      font-size: 20px;
+      margin-top: 2px;
+    }
+
+    /* Apple風格 卡片 */
+    .card {
+      background-color: var(--ios-card);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--ios-border);
+      transition: var(--transition-ios);
+    }
+
+    .card-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title i {
+      color: var(--ios-gold);
+    }
+
+    /* 儀表板 Layout */
+    .dashboard-layout {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .dashboard-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .dashboard-layout .card {
+      margin-bottom: 0;
+    }
+
+    /* 數據總覽 */
+    .stats-container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--ios-border);
+    }
+
+    .stat-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: var(--ios-gray-muted);
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--ios-gold);
+      font-family: 'Arial', sans-serif;
+    }
+
+    /* 預算進度條 */
+    .budget-section {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--ios-border);
+    }
+
+    .budget-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .budget-progress-bar {
+      height: 8px;
+      background-color: var(--ios-card-secondary);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .budget-progress-fill {
+      height: 100%;
+      background-color: var(--ios-gold);
+      border-radius: 4px;
+      width: 0%;
+      transition: width 0.5s ease-in-out;
+    }
+
+    /* 圖表容器 */
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: 230px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* iOS 經典分組表單 */
+    .ios-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .ios-input-group {
+      background-color: var(--ios-card-secondary);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .ios-form-row {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--ios-border);
+    }
+
+    .ios-form-row:last-child {
+      border-bottom: none;
+    }
+
+    .ios-form-row label {
+      width: 110px;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--ios-gray-light);
+    }
+
+    .ios-form-row input, .ios-form-row select {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: #ffffff;
+      font-size: 15px;
+      outline: none;
+      text-align: right;
+      font-family: inherit;
+    }
+
+    .ios-form-row input[type="date"], .ios-form-row input[type="number"] {
+      font-family: 'Arial', sans-serif;
+    }
+
+    .ios-form-row input::placeholder {
+      color: var(--ios-gray-muted);
+    }
+
+    /* 快捷輔助區 */
+    .helper-section {
+      margin-top: 10px;
+    }
+
+    .helper-title {
+      font-size: 12px;
+      color: var(--ios-gray-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .quick-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .quick-tag-btn {
+      background-color: var(--ios-card-secondary);
+      border: 1px solid var(--ios-border);
+      color: var(--ios-gray-light);
+      padding: 6px 12px;
+      border-radius: 14px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: var(--transition-ios);
+    }
+
+    .quick-tag-btn:hover {
+      background-color: var(--ios-border);
+      border-color: var(--ios-gold);
+    }
+
+    .btn-submit {
+      background-color: var(--ios-gold);
+      color: #000000;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-ios);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(255, 214, 10, 0.2);
+    }
+
+    .btn-submit:hover {
+      background-color: var(--ios-gold-hover);
+      transform: translateY(-1px);
+    }
+
+    /* 分類管理 */
+    .category-scroll {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+      max-height: 120px;
+      overflow-y: auto;
+      padding: 4px;
+    }
+
+    .category-badge {
+      background-color: var(--ios-card-secondary);
+      border: 1px solid var(--ios-border);
+      color: var(--ios-gray-light);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .category-badge button {
+      background: none;
+      border: none;
+      color: var(--ios-danger);
+      cursor: pointer;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 歷史記錄與篩選 */
+    .filter-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 12px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+
+    @media (max-width: 500px) {
+      .filter-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--ios-border);
+      border-radius: 12px;
+      background-color: rgba(28, 28, 30, 0.7);
+      max-height: 400px;
+      margin-bottom: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--ios-border);
+    }
+
+    th {
+      background-color: #121214;
+      color: var(--ios-gold);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tr:hover {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    .table-input {
+      border: none;
+      padding: 4px;
+      background: transparent;
+      width: 100%;
+      font-size: 14px;
+      color: #ffffff;
+      font-family: inherit;
+    }
+
+    .table-input:focus {
+      background-color: var(--ios-card-secondary);
+      outline: 1px solid var(--ios-gold);
+      border-radius: 4px;
+    }
+
+    .btn-delete-row {
+      background: none;
+      border: none;
+      color: var(--ios-danger);
+      cursor: pointer;
+      font-size: 15px;
+      padding: 4px;
+    }
+
+    .table-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-save-changes {
+      background-color: var(--ios-blue);
+      color: #ffffff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition-ios);
+    }
+
+    .btn-save-changes:hover {
+      opacity: 0.9;
+    }
+
+    /* iOS 彈出框 Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background-color: var(--ios-card);
+      border: 1px solid var(--ios-border);
+      border-radius: 14px;
+      width: 90%;
+      max-width: 440px;
+      padding: 24px;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+    }
+
+    .modal-header {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 22px;
+      color: var(--ios-gray-muted);
+      cursor: pointer;
+    }
+
+    /* iOS 成功勾勾動畫 */
+    .success-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 3000;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .success-overlay.active {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .success-box {
+      background-color: var(--ios-card);
+      border: 1px solid var(--ios-border);
+      border-radius: 20px;
+      width: 150px;
+      height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow-soft);
+      transform: scale(0.8);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .success-overlay.active .success-box {
+      transform: scale(1);
+    }
+
+    .checkmark-circle {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: block;
+      stroke-width: 3;
+      stroke: var(--ios-success);
+      stroke-miterlimit: 10;
+      box-shadow: inset 0px 0px 0px var(--ios-success);
+      animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s forwards;
+    }
+
+    .checkmark-kick {
+      transform-origin: 50% 50%;
+      stroke-dasharray: 48;
+      stroke-dashoffset: 48;
+      animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+    }
+
+    @keyframes stroke {
+      100% { stroke-dashoffset: 0; }
+    }
+    @keyframes scale {
+      0%, 100% { transform: none; }
+      50% { transform: scale3d(1.1, 1.1, 1); }
+    }
+    @keyframes fill {
+      100% { box-shadow: inset 0px 0px 0px 30px rgba(48, 209, 88, 0.05); }
+    }
+
+    .success-text {
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    /* Loading Loader */
+    .loader-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .loader-overlay.active {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .spinner {
+      border: 3px solid rgba(255,255,255,0.05);
+      border-left-color: var(--ios-gold);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translate(-50%, 100px);
+      background-color: var(--ios-card);
+      border: 1px solid var(--ios-border);
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: 24px;
+      box-shadow: var(--shadow-soft);
+      z-index: 3000;
+      opacity: 0;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast.active {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+
+    .toast.success i { color: var(--ios-success); }
+    .toast.error i { color: var(--ios-danger); }
+  </style>
+</head>
+<body>
+
+  <!-- 全局 Loading 遮罩 -->
+  <div class="loader-overlay" id="loaderOverlay">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- iOS 成功勾勾動畫 -->
+  <div class="success-overlay" id="successOverlay">
+    <div class="success-box">
+      <svg class="checkmark-circle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+        <path class="checkmark-kick" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+      </svg>
+      <div class="success-text">已完成記帳</div>
+    </div>
+  </div>
+
+  <!-- Toast 通知提示 -->
+  <div class="toast" id="toastMessage">
+    <i class="fa-solid fa-circle-check"></i>
+    <span>這是通知訊息</span>
+  </div>
+
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="brand-title">
+        <i class="fa-solid fa-car"></i> 愛車支出記帳
+      </div>
+      <button class="btn-settings" onclick="openSettingsModal()">
+        <i class="fa-solid fa-gear"></i> 設定
+      </button>
+    </header>
+
+    <!-- 首次設定引導 -->
+    <div class="setup-alert" id="setupAlert" style="display: none;">
+      <i class="fa-solid fa-circle-info"></i>
+      <div>
+        <strong>尚未設定連線！</strong> 請點選右上角「設定」按鈕，輸入 Google Apps Script URL 與密碼以連接您的雲端試算表。
+      </div>
+    </div>
+
+    <!-- Dashboard (儀表板) -->
+    <section class="dashboard-layout">
+      <!-- 數據總覽 -->
+      <div class="card">
+        <div class="card-title">
+          <i class="fa-solid fa-gauge-high"></i> 用車支出總覽
+        </div>
+        <div class="stats-container">
+          <div class="stat-row">
+            <div class="stat-label">本月用車支出</div>
+            <div class="stat-value" id="monthTotalText">$0</div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-label">目前最新里程</div>
+            <div class="stat-value" id="currentMileageText">-- km</div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-label">平均油資成本</div>
+            <div class="stat-value" id="avgFuelCostText">-- / km</div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-label">累計歷史花費</div>
+            <div class="stat-value" id="historyTotalText">$0</div>
+          </div>
+        </div>
+        <!-- 預算進度條 -->
+        <div class="budget-section">
+          <div class="budget-info">
+            <span class="stat-label">月預算使用進度</span>
+            <span id="budgetPctText" style="font-weight: 600; font-family: 'Arial', sans-serif;">0%</span>
+          </div>
+          <div class="budget-progress-bar">
+            <div class="budget-progress-fill" id="budgetProgressBar"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 分類分析圖表 -->
+      <div class="card">
+        <div class="card-title">
+          <i class="fa-solid fa-chart-pie"></i> 支出分類佔比
+        </div>
+        <div class="chart-container">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- 輸入表單與分類管理 -->
+    <section class="dashboard-layout" style="grid-template-columns: 1.3fr 1fr;">
+      <!-- 新增支出 -->
+      <div class="card">
+        <div class="card-title">
+          <i class="fa-solid fa-plus-circle"></i> 新增愛車花費
+        </div>
+        <form id="addExpenseForm" class="ios-form" onsubmit="handleAddExpense(event)">
+          <div class="ios-input-group">
+            <div class="ios-form-row">
+              <label for="expDate">日期</label>
+              <input type="date" id="expDate" required>
+            </div>
+            <div class="ios-form-row">
+              <label for="expCategory">支出分類</label>
+              <select id="expCategory" required>
+                <option value="" disabled selected>載入中...</option>
+              </select>
+            </div>
+            <div class="ios-form-row">
+              <label for="expAmount">金額</label>
+              <input type="number" id="expAmount" min="1" step="1" placeholder="輸入金額" required>
+            </div>
+            <div class="ios-form-row">
+              <label for="expMileage">目前里程 (km)</label>
+              <input type="number" id="expMileage" placeholder="選填，自動記憶上次">
+            </div>
+            <div class="ios-form-row">
+              <label for="expNote">備註說明</label>
+              <input type="text" id="expNote" placeholder="選填，例如：95加滿">
+            </div>
+          </div>
+
+          <!-- 人性化快捷輔助按鈕 -->
+          <div class="helper-section">
+            <div class="helper-title">金額快捷累加</div>
+            <div class="quick-tags" style="margin-bottom: 12px;">
+              <button type="button" class="quick-tag-btn" onclick="addAmount(100)">+100</button>
+              <button type="button" class="quick-tag-btn" onclick="addAmount(500)">+500</button>
+              <button type="button" class="quick-tag-btn" onclick="addAmount(1000)">+1000</button>
+              <button type="button" class="quick-tag-btn" onclick="addAmount(2000)">+2000</button>
+            </div>
+
+            <div class="helper-title">常用車用備註</div>
+            <div class="quick-tags">
+              <button type="button" class="quick-tag-btn" onclick="quickFillNote('95加滿', '加油')">⛽ 95加滿</button>
+              <button type="button" class="quick-tag-btn" onclick="quickFillNote('98加滿', '加油')">⛽ 98加滿</button>
+              <button type="button" class="quick-tag-btn" onclick="quickFillNote('自助洗車', '洗車/美容')">🧽 自助洗車</button>
+              <button type="button" class="quick-tag-btn" onclick="quickFillNote('eTag儲值', '停車/路費')">🛣️ eTag儲值</button>
+              <button type="button" class="quick-tag-btn" onclick="quickFillNote('定期保養', '保養')">🔧 定期保養</button>
+              <button type="button" class="quick-tag-btn" onclick="quickFillNote('路邊停車', '停車/路費')">🅿️ 路邊停車</button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit">
+            <i class="fa-solid fa-check"></i> 確認記帳
+          </button>
+        </form>
+      </div>
+
+      <!-- 分類管理 -->
+      <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div class="card-title">
+            <i class="fa-solid fa-tags"></i> 類別設定
+          </div>
+          <div class="category-scroll" id="categoryListContainer">
+            <div style="color: var(--ios-gray-muted); font-size:13px; padding: 4px;">載入中...</div>
+          </div>
+        </div>
+        <div class="add-category-input">
+          <input type="text" id="newCategoryInput" placeholder="新分類名稱" style="padding: 8px 12px;">
+          <button class="btn-add-cat" onclick="handleAddCategory()" style="padding: 8px 12px; font-weight:600;">新增</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 歷史支出查詢與編輯 -->
+    <section class="card">
+      <div class="card-title" style="justify-content: space-between; width: 100%;">
+        <span><i class="fa-solid fa-list-ul"></i> 用車花費明細</span>
+        <button class="btn-settings" onclick="exportToCSV()" style="padding: 6px 12px; font-size:12px; border-radius: 12px;">
+          <i class="fa-solid fa-file-export"></i> 匯出 CSV
+        </button>
+      </div>
+      
+      <!-- 篩選器 -->
+      <div class="filter-grid">
+        <select id="filterCategory" onchange="applyFilters()">
+          <option value="ALL">全部分類</option>
+        </select>
+        <input type="text" id="filterKeyword" placeholder="關鍵字搜尋（含里程）..." oninput="applyFilters()">
+        <button class="btn-settings" onclick="resetFilters()" style="padding: 10px 14px;">
+          <i class="fa-solid fa-rotate-left"></i>
+        </button>
+      </div>
+
+      <!-- 表格 -->
+      <div class="table-container">
+        <table id="expenseTable">
+          <thead>
+            <tr>
+              <th style="width: 25%">日期</th>
+              <th style="width: 22%">類別</th>
+              <th style="width: 20%">金額</th>
+              <th style="width: 25%">里程 & 備註</th>
+              <th style="width: 8%; text-align: center;"></th>
+            </tr>
+          </thead>
+          <tbody id="expenseTableBody">
+            <tr>
+              <td colspan="5" style="text-align: center; color: var(--ios-gray-muted); padding: 20px;">
+                請完成設定以載入明細
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 表格操作 -->
+      <div class="table-footer">
+        <span style="font-size: 14px; font-weight: 600; color: var(--ios-gold); font-family: 'Arial', sans-serif;" id="filteredTotalText">
+          篩選小計: $0 (0 筆)
+        </span>
+        <button class="btn-save-changes" id="btnSaveChanges" onclick="handleSaveChanges()" style="display: none;">
+          <i class="fa-solid fa-cloud-arrow-up"></i> 儲存所有變更
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <!-- 連線設定 Modal -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span>⚙️ 系統設定</span>
+        <button class="modal-close" onclick="closeSettingsModal()">&times;</button>
+      </div>
+      
+      <div class="ios-form" style="gap: 16px;">
+        <div class="ios-input-group">
+          <div class="ios-form-row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+            <label style="width: 100%;">GAS Web App URL</label>
+            <input type="url" id="cfgApiUrl" placeholder="https://script.google.com/macros/s/.../exec" style="text-align: left; width: 100%;">
+          </div>
+          <div class="ios-form-row">
+            <label>驗證金鑰 (Token)</label>
+            <input type="password" id="cfgToken" placeholder="輸入 API_TOKEN">
+          </div>
+          <div class="ios-form-row">
+            <label>每月用車預算</label>
+            <input type="number" id="cfgBudget" placeholder="預設 15,000">
+          </div>
+        </div>
+        
+        <!-- 💡 錯誤提示容器 -->
+        <div id="settingsErrorMsg" style="color: var(--ios-danger); font-size: 12px; margin-top: 5px; display: none; text-align: left; line-height: 1.4;"></div>
+        
+        <button class="btn-submit" onclick="saveSettings()">
+          <i class="fa-solid fa-circle-check"></i> 儲存並同步資料
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript 程式邏輯 -->
+  <script>
+    let rawExpenses = [];      // 試算表原始支出資料
+    let categoriesList = [];    // 分類
+    let chartInstance = null;   // Chart 實例
+    let wasModified = false;    // 表格是否被編輯過
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // 預設日期設為今天
+      document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
+      
+      // 讀取記憶的里程數
+      const savedMileage = localStorage.getItem('last_mileage');
+      if (savedMileage) {
+        document.getElementById('expMileage').placeholder = `前次里程: ${savedMileage}`;
+      }
+      
+      // 載入預算設定
+      let savedBudget = localStorage.getItem('monthly_budget');
+      if (!savedBudget) {
+        savedBudget = "15000";
+        localStorage.setItem('monthly_budget', savedBudget);
+      }
+      document.getElementById('cfgBudget').value = savedBudget;
+
+      // 載入 API 連線設定
+      const apiUrl = localStorage.getItem('gas_api_url');
+      const apiToken = localStorage.getItem('gas_api_token');
+      
+      if (apiUrl && apiToken) {
+        document.getElementById('cfgApiUrl').value = apiUrl;
+        document.getElementById('cfgToken').value = apiToken;
+        loadDataFromSheet();
+      } else {
+        document.getElementById('setupAlert').style.display = 'flex';
+        openSettingsModal();
+      }
+    });
+
+    // 顯示/隱藏 Loading
+    function showLoading(show) {
+      const loader = document.getElementById('loaderOverlay');
+      if (show) loader.classList.add('active');
+      else loader.classList.remove('active');
+    }
+
+    // 觸發 Apple-style 成功動畫
+    function triggerSuccessAnimation() {
+      const overlay = document.getElementById('successOverlay');
+      overlay.classList.add('active');
+      setTimeout(() => {
+        overlay.classList.remove('active');
+      }, 1500);
+    }
+
+    // Toast 提示訊息
+    function showToast(message, isSuccess = true) {
+      const toast = document.getElementById('toastMessage');
+      toast.className = `toast active ${isSuccess ? 'success' : 'error'}`;
+      toast.querySelector('span').textContent = message;
+      toast.querySelector('i').className = isSuccess ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-xmark';
+      
+      setTimeout(() => {
+        toast.classList.remove('active');
+      }, 3000);
+    }
+
+    // Modal 控制
+    function openSettingsModal() {
+      document.getElementById('settingsModal').classList.add('active');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').classList.remove('active');
+      // 關閉時清除紅字錯誤
+      document.getElementById('settingsErrorMsg').style.display = 'none';
+    }
+
+    // 儲存連線與預算設定（點選後直接測試連線，成功才關閉）
+    async function saveSettings() {
+      const url = document.getElementById('cfgApiUrl').value.trim();
+      const token = document.getElementById('cfgToken').value.trim();
+      const budget = document.getElementById('cfgBudget').value.trim();
+      const errorDiv = document.getElementById('settingsErrorMsg');
+
+      if (!url || !token) {
+        alert("請完整輸入 GAS Web App URL 與驗證 Token！");
+        return;
+      }
+
+      errorDiv.style.display = 'none';
+      errorDiv.textContent = '';
+      showLoading(true);
+
+      try {
+        // 發送測試請求
+        const fetchUrl = `${url}?token=${encodeURIComponent(token)}&action=getData`;
+        const response = await fetch(fetchUrl);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP 錯誤: ${response.status}`);
+        }
+        
+        const result = await response.json();
+
+        if (result.status === "success") {
+          // 成功後才寫入 LocalStorage
+          localStorage.setItem('gas_api_url', url);
+          localStorage.setItem('gas_api_token', token);
+          if (budget && Number(budget) > 0) {
+            localStorage.setItem('monthly_budget', budget);
+          }
+
+          rawExpenses = result.expenses || [];
+          categoriesList = result.categories || [];
+          wasModified = false;
+          document.getElementById('btnSaveChanges').style.display = 'none';
+
+          // 更新 UI
+          updateCategoriesDropdown();
+          updateCategoriesBadges();
+          updateDashboardStats();
+          renderChart();
+          populateExpenseTable(rawExpenses);
+
+          document.getElementById('setupAlert').style.display = 'none';
+          closeSettingsModal();
+          showToast("連線並同步成功", true);
+        } else {
+          errorDiv.textContent = `連線失敗: ${result.message}`;
+          errorDiv.style.display = 'block';
+        }
+      } catch (error) {
+        console.error(error);
+        errorDiv.innerHTML = `連線失敗，請檢查下列事項：<br>
+          1. URL 是否複製正確？ (應為 macros/s/.../exec)<br>
+          2. GAS 部署的存取權限是否設定為「任何人 (Anyone)」？<br>
+          3. 驗證金鑰 (Token) 是否與 GAS 程式碼內一致？<br>
+          (原因: ${error.message || '網路異常'})`;
+        errorDiv.style.display = 'block';
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // 快捷鍵邏輯：累加金額
+    function addAmount(value) {
+      const amtInput = document.getElementById('expAmount');
+      const current = Number(amtInput.value) || 0;
+      amtInput.value = current + value;
+    }
+
+    // 快捷鍵邏輯：填寫常用備註並自動配對分類
+    function quickFillNote(noteText, defaultCategory) {
+      document.getElementById('expNote').value = noteText;
+      
+      // 自動匹配對應的分類（如果存在於分類清單中）
+      if (categoriesList.includes(defaultCategory)) {
+        document.getElementById('expCategory').value = defaultCategory;
+      }
+    }
+
+    // 💡 輔助函數：從備註字串中 Regex 解析里程 Km
+    function extractMileage(note) {
+      if (!note) return null;
+      const match = note.match(/(\d+)\s*(?:km|公里)/i);
+      return match ? Number(match[1]) : null;
+    }
+
+    // 從 Google Sheets 載入資料 (GET) - 背景同步，若失敗會警告但不要重演 close/open 動態
+    async function loadDataFromSheet() {
+      const apiUrl = localStorage.getItem('gas_api_url');
+      const apiToken = localStorage.getItem('gas_api_token');
+
+      if (!apiUrl || !apiToken) return;
+
+      showLoading(true);
+      try {
+        const fetchUrl = `${apiUrl}?token=${encodeURIComponent(apiToken)}&action=getData`;
+        const response = await fetch(fetchUrl);
+        if (!response.ok) throw new Error(`HTTP 錯誤: ${response.status}`);
+        const result = await response.json();
+
+        if (result.status === "success") {
+          rawExpenses = result.expenses || [];
+          categoriesList = result.categories || [];
+          wasModified = false;
+          document.getElementById('btnSaveChanges').style.display = 'none';
+
+          // 更新 UI
+          updateCategoriesDropdown();
+          updateCategoriesBadges();
+          updateDashboardStats();
+          renderChart();
+          populateExpenseTable(rawExpenses);
+          showToast("雲端資料同步成功", true);
+        } else {
+          showToast("雲端資料讀取失敗: " + result.message, false);
+          openSettingsModal();
+          const errorDiv = document.getElementById('settingsErrorMsg');
+          errorDiv.textContent = `背景同步失敗: ${result.message}`;
+          errorDiv.style.display = 'block';
+        }
+      } catch (error) {
+        console.error(error);
+        showToast("背景連線異常，請重新設定", false);
+        openSettingsModal();
+        const errorDiv = document.getElementById('settingsErrorMsg');
+        errorDiv.textContent = `背景連線失敗: ${error.message || '網路異常'}`;
+        errorDiv.style.display = 'block';
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // 更新分類選單
+    function updateCategoriesDropdown() {
+      const dropdown = document.getElementById('expCategory');
+      const filterDropdown = document.getElementById('filterCategory');
+      
+      dropdown.innerHTML = "";
+      filterDropdown.innerHTML = '<option value="ALL">全部分類</option>';
+
+      if (categoriesList.length === 0) {
+        dropdown.innerHTML = '<option value="" disabled selected>請先新增類別</option>';
+        return;
+      }
+
+      categoriesList.forEach((cat, idx) => {
+        const opt = document.createElement('option');
+        opt.value = cat;
+        opt.textContent = cat;
+        if (idx === 0) opt.selected = true;
+        dropdown.appendChild(opt);
+
+        const optFilter = document.createElement('option');
+        optFilter.value = cat;
+        optFilter.textContent = cat;
+        filterDropdown.appendChild(optFilter);
+      });
+    }
+
+    // 更新類別 Badge 清單
+    function updateCategoriesBadges() {
+      const container = document.getElementById('categoryListContainer');
+      container.innerHTML = "";
+
+      if (categoriesList.length === 0) {
+        container.innerHTML = '<div style="color: var(--ios-gray-muted); font-size:13px; padding: 4px;">尚未配置類別</div>';
+        return;
+      }
+
+      categoriesList.forEach(cat => {
+        const badge = document.createElement('span');
+        badge.className = 'category-badge';
+        badge.innerHTML = `
+          ${escapeHtml(cat)}
+          <button onclick="handleDeleteCategory('${escapeHtml(cat)}')">
+            <i class="fa-solid fa-circle-xmark"></i>
+          </button>
+        `;
+        container.appendChild(badge);
+      });
+    }
+
+    // 計算用車統計、最新里程、以及平均每公里油資
+    function updateDashboardStats() {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
+      const todayStr = now.toISOString().split('T')[0];
+
+      let monthTotal = 0;
+      let dayTotal = 0;
+      let historyTotal = 0;
+      
+      let maxMileage = 0;           // 目前最新里程
+      const fuelRecords = [];       // 用於油耗/油資分析的加油紀錄
+
+      rawExpenses.forEach(exp => {
+        const amount = Number(exp.amount) || 0;
+        historyTotal += amount;
+
+        // 計算本日與本月總額
+        if (exp.date === todayStr) {
+          dayTotal += amount;
+        }
+        if (exp.date && exp.date.startsWith(`${currentYear}-${currentMonth}`)) {
+          monthTotal += amount;
+        }
+
+        // 解析此筆備註中是否含有里程 Km
+        const mileage = extractMileage(exp.note);
+        if (mileage) {
+          if (mileage > maxMileage) {
+            maxMileage = mileage;
+          }
+
+          // 判斷此筆是否為「油錢」或「加油」類型的支出
+          const isFuel = exp.category && 
+            (exp.category === "油錢" || exp.category === "加油" || exp.category.includes("油"));
+          
+          if (isFuel) {
+            fuelRecords.push({
+              date: exp.date,
+              amount: amount,
+              mileage: mileage
+            });
+          }
+        }
+      });
+
+      // 1. 填入本月、今日與歷史花費
+      document.getElementById('monthTotalText').textContent = `$${monthTotal.toLocaleString()}`;
+      document.getElementById('dayTotalText').textContent = `$${dayTotal.toLocaleString()}`;
+      document.getElementById('historyTotalText').textContent = `$${historyTotal.toLocaleString()}`;
+
+      // 2. 填入目前最新里程
+      if (maxMileage > 0) {
+        document.getElementById('currentMileageText').textContent = `${maxMileage.toLocaleString()} km`;
+      } else {
+        document.getElementById('currentMileageText').textContent = `-- km`;
+      }
+
+      // 3. 試算平均每公里油資花費
+      // 按里程從小到大排序 (時間順序)
+      fuelRecords.sort((a, b) => a.mileage - b.mileage);
+      
+      if (fuelRecords.length >= 2) {
+        const firstFuel = fuelRecords[0];
+        const lastFuel = fuelRecords[fuelRecords.length - 1];
+        const mileageDiff = lastFuel.mileage - firstFuel.mileage;
+
+        if (mileageDiff > 0) {
+          let totalFuelCost = 0;
+          for (let i = 1; i < fuelRecords.length; i++) {
+            totalFuelCost += fuelRecords[i].amount;
+          }
+          const costPerKm = (totalFuelCost / mileageDiff).toFixed(2);
+          document.getElementById('avgFuelCostText').textContent = `$${costPerKm} / km`;
+        } else {
+          document.getElementById('avgFuelCostText').textContent = `-- / km`;
+        }
+      } else {
+        document.getElementById('avgFuelCostText').textContent = `需 2 筆里程`;
+      }
+
+      // 4. 預算條渲染
+      const budgetLimit = Number(localStorage.getItem('monthly_budget')) || 15000;
+      const budgetPct = Math.min(Math.round((monthTotal / budgetLimit) * 100), 100);
+      
+      const fillBar = document.getElementById('budgetProgressBar');
+      fillBar.style.width = `${budgetPct}%`;
+      document.getElementById('budgetPctText').textContent = `${budgetPct}%`;
+
+      // 預算超額視覺警告
+      if (budgetPct >= 90) {
+        fillBar.style.backgroundColor = 'var(--ios-danger)';
+      } else if (budgetPct >= 75) {
+        fillBar.style.backgroundColor = '#ff9f0a'; // 橘色
+      } else {
+        fillBar.style.backgroundColor = 'var(--ios-gold)';
+      }
+    }
+
+    // 渲染 Chart.js 支出圓餅佔比
+    function renderChart() {
+      const ctx = document.getElementById('categoryChart').getContext('2d');
+      
+      const catTotals = {};
+      categoriesList.forEach(cat => catTotals[cat] = 0);
+      
+      rawExpenses.forEach(exp => {
+        if (catTotals[exp.category] !== undefined) {
+          catTotals[exp.category] += Number(exp.amount) || 0;
+        } else if (exp.category) {
+          catTotals[exp.category] = (catTotals[exp.category] || 0) + (Number(exp.amount) || 0);
+        }
+      });
+
+      const labels = [];
+      const data = [];
+      
+      Object.keys(catTotals).forEach(cat => {
+        if (catTotals[cat] > 0) {
+          labels.push(cat);
+          data.push(catTotals[cat]);
+        }
+      });
+
+      if (chartInstance) chartInstance.destroy();
+
+      if (labels.length === 0) {
+        ctx.clearRect(0, 0, 400, 400);
+        ctx.fillStyle = '#8e8e93';
+        ctx.textAlign = 'center';
+        ctx.font = '14px -apple-system';
+        ctx.fillText('尚無消費數據可供圖表分析', 150, 100);
+        return;
+      }
+
+      // Apple Style 暗色系統調色盤
+      const colorPalette = [
+        '#0a84ff', // 藍
+        '#ffd60a', // 金
+        '#ff9f0a', // 橘
+        '#30d158', // 綠
+        '#bf5af2', // 紫
+        '#ff453a', // 紅
+        '#64d2ff', // 淺藍
+        '#8e8e93', // 灰
+        '#5e5e62'
+      ];
+
+      chartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: colorPalette.slice(0, labels.length),
+            borderWidth: 1.5,
+            borderColor: '#1c1c1e'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                color: '#f2f2f7',
+                boxWidth: 12,
+                font: {
+                  family: 'Arial',
+                  size: 11
+                }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const val = context.raw;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const pct = ((val / total) * 100).toFixed(1);
+                  return ` ${context.label}: $${val.toLocaleString()} (${pct}%)`;
+                }
+              }
+            }
+          },
+          cutout: '70%'
+        }
+      });
+    }
+
+    // 填充支出明細表格
+    function populateExpenseTable(data) {
+      const tbody = document.getElementById('expenseTableBody');
+      tbody.innerHTML = "";
+
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--ios-gray-muted); padding: 20px;">無支出記錄</td></tr>';
+        document.getElementById('filteredTotalText').textContent = '篩選小計: $0 (0 筆)';
+        return;
+      }
+
+      // 由近到遠排序
+      const sortedData = [...data].sort((a, b) => new Date(b.date) - new Date(a.date));
+      let totalFiltered = 0;
+
+      sortedData.forEach(exp => {
+        totalFiltered += Number(exp.amount) || 0;
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <input type="date" class="table-input" value="${exp.date}" onchange="updateRowValue(${exp.rowNum}, 'date', this.value)">
+          </td>
+          <td>
+            <select class="table-input" onchange="updateRowValue(${exp.rowNum}, 'category', this.value)">
+              ${categoriesList.map(cat => `<option value="${cat}" ${cat === exp.category ? 'selected' : ''}>${cat}</option>`).join('')}
+            </select>
+          </td>
+          <td>
+            <input type="number" class="table-input" value="${exp.amount}" onchange="updateRowValue(${exp.rowNum}, 'amount', this.value)" style="font-weight:600; color: var(--ios-gold);">
+          </td>
+          <td>
+            <input type="text" class="table-input" value="${escapeHtml(exp.note)}" onchange="updateRowValue(${exp.rowNum}, 'note', this.value)">
+          </td>
+          <td style="text-align:center;">
+            <button class="btn-delete-row" onclick="handleDeleteRow(${exp.rowNum})" title="刪除">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('filteredTotalText').textContent = `篩選小計: $${totalFiltered.toLocaleString()} (${data.length} 筆)`;
+    }
+
+    // 編輯欄位更新值
+    function updateRowValue(rowNum, field, value) {
+      wasModified = true;
+      document.getElementById('btnSaveChanges').style.display = 'block';
+
+      const index = rawExpenses.findIndex(exp => exp.rowNum === rowNum);
+      if (index !== -1) {
+        if (field === 'amount') {
+          rawExpenses[index][field] = Number(value) || 0;
+        } else {
+          rawExpenses[index][field] = value;
+        }
+      }
+      
+      updateDashboardStats();
+      renderChart();
+    }
+
+    // 刪除表格列
+    function handleDeleteRow(rowNum) {
+      if (!confirm("確定要刪除這筆支出嗎？需要點選『儲存所有變更』才會同步至試算表。")) return;
+      
+      wasModified = true;
+      document.getElementById('btnSaveChanges').style.display = 'block';
+
+      rawExpenses = rawExpenses.filter(exp => exp.rowNum !== rowNum);
+      
+      // 重建行號
+      rawExpenses.forEach((exp, idx) => {
+        exp.rowNum = idx + 2;
+      });
+
+      applyFilters();
+      updateDashboardStats();
+      renderChart();
+    }
+
+    // 篩選與搜尋
+    function applyFilters() {
+      const cat = document.getElementById('filterCategory').value;
+      const keyword = document.getElementById('filterKeyword').value.trim().toLowerCase();
+
+      let filtered = rawExpenses;
+
+      if (cat !== "ALL") {
+        filtered = filtered.filter(exp => exp.category === cat);
+      }
+
+      if (keyword) {
+        filtered = filtered.filter(exp => exp.note && exp.note.toLowerCase().includes(keyword));
+      }
+
+      populateExpenseTable(filtered);
+    }
+
+    // 重設篩選器
+    function resetFilters() {
+      document.getElementById('filterCategory').value = 'ALL';
+      document.getElementById('filterKeyword').value = '';
+      applyFilters();
+    }
+
+    // 新增愛車花費 (POST) - 含里程數合併備註邏輯
+    async function handleAddExpense(event) {
+      event.preventDefault();
+      
+      const apiUrl = localStorage.getItem('gas_api_url');
+      const apiToken = localStorage.getItem('gas_api_token');
+
+      if (!apiUrl || !apiToken) {
+        alert("請先完成連線與設定！");
+        return;
+      }
+
+      const date = document.getElementById('expDate').value;
+      const category = document.getElementById('expCategory').value;
+      const amount = Number(document.getElementById('expAmount').value) || 0;
+      const mileage = document.getElementById('expMileage').value.trim();
+      let note = document.getElementById('expNote').value.trim();
+
+      if (amount <= 0) {
+        alert("金額需大於 0");
+        return;
+      }
+
+      // 里程數與備註處理
+      if (mileage) {
+        localStorage.setItem('last_mileage', mileage);
+        document.getElementById('expMileage').placeholder = `前次里程: ${mileage}`;
+        note = `[${mileage} km] ${note}`.trim();
+      }
+
+      showLoading(true);
+      try {
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          mode: "cors",
+          headers: {
+            "Content-Type": "text/plain"
+          },
+          body: JSON.stringify({
+            token: apiToken,
+            action: "addExpense",
+            date: date,
+            category: category,
+            amount: amount,
+            note: note
+          })
+        });
+        
+        const result = await response.json();
+
+        if (result.status === "success") {
+          document.getElementById('expAmount').value = '';
+          document.getElementById('expMileage').value = '';
+          document.getElementById('expNote').value = '';
+          
+          triggerSuccessAnimation();
+          
+          setTimeout(async () => {
+            await loadDataFromSheet();
+          }, 1000);
+        } else {
+          showToast("新增失敗: " + result.message, false);
+        }
+      } catch (error) {
+        console.error(error);
+        showToast("網路異常，無法記帳", false);
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // 新增類別 (POST)
+    async function handleAddCategory() {
+      const apiUrl = localStorage.getItem('gas_api_url');
+      const apiToken = localStorage.getItem('gas_api_token');
+      const newCatInput = document.getElementById('newCategoryInput');
+      const newCat = newCatInput.value.trim();
+
+      if (!apiUrl || !apiToken) return;
+      if (!newCat) {
+        alert("請輸入類別名稱！");
+        return;
+      }
+
+      showLoading(true);
+      try {
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          mode: "cors",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify({
+            token: apiToken,
+            action: "addCategory",
+            category: newCat
+          })
+        });
+
+        const result = await response.json();
+        if (result.status === "success") {
+          newCatInput.value = "";
+          showToast(`已新增類別：${newCat}`, true);
+          await loadDataFromSheet();
+        } else {
+          showToast("新增失敗: " + result.message, false);
+        }
+      } catch (error) {
+        console.error(error);
+        showToast("網路錯誤，無法新增類別", false);
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // 刪除類別 (POST)
+    async function handleDeleteCategory(categoryName) {
+      if (!confirm(`確定要刪除類別「${categoryName}」嗎？`)) return;
+
+      const apiUrl = localStorage.getItem('gas_api_url');
+      const apiToken = localStorage.getItem('gas_api_token');
+
+      showLoading(true);
+      try {
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          mode: "cors",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify({
+            token: apiToken,
+            action: "deleteCategory",
+            category: categoryName
+          })
+        });
+
+        const result = await response.json();
+        if (result.status === "success") {
+          showToast(`已刪除類別：${categoryName}`, true);
+          await loadDataFromSheet();
+        } else {
+          showToast("刪除失敗: " + result.message, false);
+        }
+      } catch (error) {
+        console.error(error);
+        showToast("網路錯誤，無法刪除類別", false);
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // 批次儲存明細變更至試算表 (POST)
+    async function handleSaveChanges() {
+      const apiUrl = localStorage.getItem('gas_api_url');
+      const apiToken = localStorage.getItem('gas_api_token');
+
+      if (!apiUrl || !apiToken) return;
+
+      if (!confirm("確定要將所有編輯後的明細同步覆寫至 Google Sheets 嗎？")) return;
+
+      showLoading(true);
+      try {
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          mode: "cors",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify({
+            token: apiToken,
+            action: "saveAllChanges",
+            expenses: rawExpenses
+          })
+        });
+
+        const result = await response.json();
+        if (result.status === "success") {
+          showToast("明細覆寫成功！", true);
+          await loadDataFromSheet();
+        } else {
+          showToast("儲存失敗: " + result.message, false);
+        }
+      } catch (error) {
+        console.error(error);
+        showToast("網路錯誤，同步失敗", false);
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // 一鍵匯出為 CSV 備份
+    function exportToCSV() {
+      if (rawExpenses.length === 0) {
+        alert("尚無資料可供匯出！");
+        return;
+      }
+
+      const cat = document.getElementById('filterCategory').value;
+      const keyword = document.getElementById('filterKeyword').value.trim().toLowerCase();
+
+      let filtered = rawExpenses;
+      if (cat !== "ALL") filtered = filtered.filter(exp => exp.category === cat);
+      if (keyword) filtered = filtered.filter(exp => exp.note && exp.note.toLowerCase().includes(keyword));
+
+      let csvContent = "\uFEFF"; 
+      csvContent += "日期,類別,金額,里程與備註\n";
+
+      const sorted = [...filtered].sort((a, b) => new Date(a.date) - new Date(a.date));
+      sorted.forEach(exp => {
+        const safeNote = String(exp.note).replace(/,/g, "，");
+        csvContent += `${exp.date},${exp.category},${exp.amount},${safeNote}\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `愛車支出記帳備份_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // 輔助防 XSS
+    function escapeHtml(string) {
+      if (!string) return '';
+      return String(string).replace(/[&<>"']/g, function (s) {
+        return {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': '&quot;',
+          "'": '&#39;'
+        }[s];
+      });
+    }
+  </script>
+</body>
+</html>

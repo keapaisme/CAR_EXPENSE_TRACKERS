@@ -1,0 +1,41 @@
+<!--
+Version: v1.0
+Description: 專案說明文件。說明如何部署 Google Apps Script 後端，並藉由 index.html 實現免 Python 環境的個人支出記帳，同時設定驗證機制保護試算表隱私。
+-->
+# 💰 個人支出記錄系統 (GAS + HTML 直連版)
+
+> 本專案已改寫為純前端網頁（HTML/CSS/JavaScript），直接透過 **Google Apps Script (GAS)** Web App 與 Google Sheets 進行安全資料同步，無需安裝 Python、Streamlit 或設定本機 Credentials 憑證，並支援手機與桌面端！
+
+## 🌟 改版特色
+
+- ✅ **安全隱私防護**：Web App URL 與驗證 Token 不硬編碼在網頁代碼中，而是儲存在您的瀏覽器 `LocalStorage` 中，防止個人試算表資訊洩漏。
+- ✅ **漂亮的數據可視化**：採用藍、咖、金、白古典配色，並整合 Chart.js 提供流暢的分類消費佔比環狀圖。
+- ✅ **完整的 CRUD 功能**：支援新增記帳、分類管理、即時篩選、以及在表格內直接編輯或刪除記錄並批次同步回試算表。
+- ✅ **完全零主機成本**：利用 Google 試算表作為資料庫與 API 後端，前端可作為靜態網頁直接在手機或電腦開啟（亦可部署在 GitHub Pages 等免費空間）。
+
+---
+
+## 🛠️ 開始使用
+
+### 第一步：部署 Google Apps Script 後端
+請參閱詳細的後端部署文件：
+👉 [Google Apps Script 後端部署指南](file:///Users/kas/.gemini/antigravity/brain/d37d00c7-4744-49a8-b916-a3ffecaf77e0/gas_script_template.md)
+
+1. 開啟試算表，點選「擴充功能 > Apps Script」。
+2. 貼上程式碼，修改 `API_TOKEN`，部署為「網頁應用程式」。
+3. 複製產生的 **網頁應用程式 URL**。
+
+### 第二步：開啟前端網頁
+1. 直接在瀏覽器中點擊打開本專案的 `index.html`。
+2. 點選右上角的 **「連線設定」**。
+3. 輸入您第一步取得的 **GAS Web App URL** 與您自訂的 **驗證 Token (密碼)**。
+4. 點選 **「儲存並測試連線」**。
+5. 連線成功後，系統會自動載入資料，您就可以開始記帳了！
+
+---
+
+## 📂 專案檔案結構
+
+- [index.html](file:///Users/kas/Documents/PythonProject/Expense_tracker/index.html) - 前端主要記帳網頁，包含 UI 設計、數據圖表與 API 互動邏輯。
+- [bak/](file:///Users/kas/Documents/PythonProject/Expense_tracker/bak/) - 存放上一代 Python/Streamlit 專案舊檔案的備份目錄。
+- [gas_script_template.md](file:///Users/kas/.gemini/antigravity/brain/d37d00c7-4744-49a8-b916-a3ffecaf77e0/gas_script_template.md) - Google Apps Script 後端設定與原始碼範本。

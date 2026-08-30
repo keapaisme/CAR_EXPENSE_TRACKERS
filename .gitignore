@@ -1,7 +1,18 @@
-# 忽略 Google 憑證
-credentials.json
+# 忽略系統與臨時檔
+.DS_Store
+
+# 忽略 Google 憑證檔
+credentials*
+*.json.bak*
 
 # 也可一併忽略 Python 快取
 __pycache__/
 *.pyc
 .env
+.venv/
+
+# 測試檔與臨時目錄
+.tmp/
+test_*
+*.aiff
+*.wav

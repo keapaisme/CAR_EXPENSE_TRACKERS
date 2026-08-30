@@ -1,72 +1,50 @@
-簡介：這個專案是運用AI在2小時內完成，我先給QWEN下面說明，然後按照提示一步步完成
- "我想用PYTHON寫一個資料庫程式，
-  功能要求：可增刪修。
-  資料庫用 google SHEET, 
-  介面用streamlit.
-  請一步一步教用建立資料庫程式。
-  可否列三個主題供我選擇後開始 "
+<!--
+Version: v2.0
+Description: 專案說明文件。更新為 Apple iOS 風格愛車支出記帳系統 (v2.0) 說明，新增車用快捷鍵、里程記憶欄位、預算進度條等功能的詳細配置與使用介紹。
+-->
+# 🚗 愛車支出記帳系統 (Apple 風格版)
 
-這個專案目的：
-想測試是否能利用AI工具完成一個專案，其落地程度？難易度？所花費的時間？利用實作了解並記錄一個由AI指導從無到有的過程
+> 本專案是為**愛車花費記帳**量身打造的輕量化、純前端網頁（HTML/CSS/JS）。透過 **Google Apps Script (GAS) Web App** 直連您的 Google Sheets 試算表，免去了裝 Python 或是本機 Credentials 憑證的繁瑣。介面全面重構為 **Apple iOS 暗色模式風格**，並內建了多項針對車主設計的人性化功能！
 
-這個程式具備：
-  資料庫整合（Google Sheets）
-  前端介面（Streamlit）
-  雲端部署（Streamlit Cloud）
-  行動裝置相容
-  完整 CRUD 功能
+## 🍎 視覺與互動亮點
 
-以下也是QWEN代為制作的MarkDown:
-# 💰 個人支出記錄系統
+- **Apple 極簡美學**：採用 iOS 17/18 暗色模式的黑色背景（`#000000`）與深灰卡片（`#1c1c1e`）搭配細緻的金色亮點。去除了生硬的框線，以呼吸感的排版和大圓角展現出高雅質感。
+- **iOS 經典表單**：採用 Row-based 分組列表的表單風格，直覺精簡。
+- **記帳成功動畫**：記帳成功時會彈出類似 Apple Pay 完成交易時的精美「打勾」動態回饋。
 
-> 用 Python + Streamlit + Google Sheets 打造的輕量級記帳工具，支援**新增、編輯、刪除、統計**，並可**在手機與電腦上隨時存取**！
+---
 
-[![Demo](https://img.shields.io/badge/線上Demo-Streamlit-blue?logo=streamlit)](https://expense-tracker-34hwuzxtutel4zlasvgcdu.streamlit.app/)
-[![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://python.org)
-[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+## ✨ 車主專用的人性化功能
 
-## 🌟 功能特色
+1. **里程數欄位記憶 (Mileage)**：
+   - 每次加油、保養或洗車時可輸入目前的里程數。
+   - 系統會透過 LocalStorage 自動記憶您上一次填寫的里程，作為下次輸入的預設提示，省去重複查看的麻煩。
+   - **無縫相容舊資料庫**：里程數會自動以 `[123456 km] 備註` 的格式併入「備註」欄位傳送，您不需要修改原本試算表的任何欄位，舊資料完全保留。
+2. **用車支出快捷鍵**：
+   - **金額快捷**：提供了 `+100`、`+500`、`+1000`、`+2000` 快速累加按鈕。
+   - **車用常用備註**：一鍵填寫如 `95加滿`、`98加滿`、`定期保養`、`自助洗車`、`路邊停車` 等，並自動對應相關分類。
+3. **每月用車預算進度條**：
+   - 可在設定中自由輸入您的「每月用車預算」（例如 15,000 元）。
+   - 儀表板將即時顯示當月花費佔預算比例。當支出接近 75% 時會呈現橙色，超過 90% 時會呈現紅色警示。
+4. **一鍵 CSV 數據匯出**：
+   - 支援將當前過濾或全部的用車支出明細一鍵下載為本機 CSV 備份。內容已加入 UTF-8 BOM，用 Windows Excel 開啟也不會出現中文亂碼。
 
-- ✅ **跨平台使用**：桌面 / 手機瀏覽器皆可操作（已測試 iPhone 11/12, Redmi KC40）
-- ✅ **即時同步**：所有資料儲存於 Google Sheets，永不遺失
-- ✅ **直覺介面**：表格編輯 + 日期選擇器 + 金額輸入
-- ✅ **財務統計**：總支出 + 分類圖表（未來可擴充）
-- ✅ **完全免費**：使用 Streamlit Cloud 免費部署
+---
 
-## 🖥️ 線上 Demo
+## 🛠️ 開始使用
 
-👉 [點此開啟線上版本](https://expense-tracker-34hwuzxtutel4zlasvgcdu.streamlit.app/)
+### 第一步：部署 Google Apps Script 後端
+請參閱詳細的後端部署文件：
+👉 [Google Apps Script 後端部署指南](file:///Users/kas/.gemini/antigravity/brain/d37d00c7-4744-49a8-b916-a3ffecaf77e0/gas_script_template.md)
 
-> 💡 首次載入可能需要 5-10 秒（Streamlit Cloud 冷啟動）
+1. 開啟您的試算表，點選「擴充功能 > Apps Script」。
+2. 貼上代碼，部署為「網頁應用程式」。
+3. 複製產生的 **網頁應用程式 URL**。
 
-## 📸 介面預覽
-
-| 桌面版                                       | 手機版（iPhone）                                  |
-|-------------------------------------------|----------------------------------------------|
-| ![1](img/sdesk1.jpeg) | ![1](img/smobie1.jpeg) |
-
-## 🛠️ 本機開發
-
-### 前置需求
-- Python 3.9+
-- Google Cloud Service Account（[教學](https://docs.gspread.org/en/latest/oauth2.html)）
-
-### 安裝步驟
-```bash
-# 1. 克隆專案
-git clone https://github.com/keapaisme/expense-tracker.git
-cd expense-tracker
-
-# 2. 建立虛擬環境（可選但推薦）
-python -m venv .venv
-source .venv/bin/activate  # macOS/Linux
-# .venv\Scripts\activate   # Windows
-
-# 3. 安裝套件
-pip install -r requirements.txt
-
-# 4. 放入你的 Google 憑證
-# 將 credentials.json 放到專案根目錄
-
-# 5. 執行
-streamlit run app.py
+### 第二步：開啟前端網頁
+1. 直接在瀏覽器中雙擊打開本專案的 [index.html](file:///Users/kas/Documents/PythonProject/Expense_tracker/index.html)。
+2. 點選右上角的 **「設定」 (Gear 圖示)**。
+3. 輸入您的 **GAS Web App URL** 與您自訂的 **驗證 Token (密碼)**。
+4. 設定您的 **每月用車預算**（預設為 15,000 元）。
+5. 點選 **「儲存並同步資料」**。
+6. 連線成功後，系統將自動載入您原本的所有愛車記帳資料，並立即繪製精美的分類圖表！
