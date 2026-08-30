@@ -34,15 +34,14 @@ Description: 專案說明文件。更新為 Apple iOS 風格愛車支出記帳�
 ## 🛠️ 開始使用
 
 ### 第一步：部署 Google Apps Script 後端
-請參閱詳細的後端部署文件：
-👉 [Google Apps Script 後端部署指南](file:///Users/kas/.gemini/antigravity/brain/d37d00c7-4744-49a8-b916-a3ffecaf77e0/gas_script_template.md)
+請參閱詳細的後端部署說明，將 Apps Script 代碼部署至您的 Google 試算表中：
 
 1. 開啟您的試算表，點選「擴充功能 > Apps Script」。
 2. 貼上代碼，部署為「網頁應用程式」。
 3. 複製產生的 **網頁應用程式 URL**。
 
 ### 第二步：開啟前端網頁
-1. 直接在瀏覽器中雙擊打開本專案的 [index.html](file:///Users/kas/Documents/PythonProject/Expense_tracker/index.html)。
+1. 直接在瀏覽器中開啟本專案的 [index.html](index.html) 或存取 GitHub Pages 網址。
 2. 點選右上角的 **「設定」 (Gear 圖示)**。
 3. 輸入您的 **GAS Web App URL** 與您自訂的 **驗證 Token (密碼)**。
 4. 設定您的 **每月用車預算**（預設為 15,000 元）。

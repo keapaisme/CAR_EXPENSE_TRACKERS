@@ -1103,8 +1103,8 @@ Description: 個人支出記錄系統純前端網頁。升級至 v3.2，新增�
   <!-- JavaScript 程式邏輯 -->
   <script>
     // ⚙️ 系統預設設定（可選：在此直接填入，手機開啟時就不必每次都輸入了）
-    const DEFAULT_GAS_API_URL = "https://script.google.com/macros/s/AKfycbylySu_I6LuC70k56RszCjE9iO99r89R-Z4d9xOvxI0eY2Xmws/exec"; 
-    const DEFAULT_API_TOKEN = "";   // 👈 您可以直接將您的 Token 密碼貼在此雙引號中
+    const DEFAULT_GAS_API_URL = "demo"; 
+    const DEFAULT_API_TOKEN = "demo";   // 👈 您可以直接將您的 Token 密碼貼在此雙引號中
 
     let rawExpenses = [];      // 試算表原始支出資料
     let categoriesList = [];    // 分類
