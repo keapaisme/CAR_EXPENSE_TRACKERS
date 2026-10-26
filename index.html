@@ -1,6 +1,6 @@
 <!DOCTYPE html><!--
-Version: v3.4
-Description: 個人支出記錄系統純前端網頁。升級至 v3.4，預設連線 URL 與 Token 設為 "demo"，使網頁開啟即自動載入體驗展示模式與 Mock 數據，隨時可在設定選單替換為個人 GAS 連線。
+Version: v3.5
+Description: 個人支出記錄系統純前端網頁。升級至 v3.5，修復 extractMileage() note.match is not a function 崩潰問題，加入 typeof note !== 'string' 防禦性檢查，防止 GAS API 回傳空值/非字串備註欄位導致頁面崩潰。
 -->
 
 <html lang="zh-TW">
