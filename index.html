@@ -1290,7 +1290,7 @@ Description: 個人支出記錄系統純前端網頁。升級至 v3.4，預設�
 
     // 輔助函數：從備註字串中 Regex 解析里程 Km
     function extractMileage(note) {
-      if (!note) return null;
+      if (!note || typeof note !== 'string') return null;
       const match = note.match(/(\d+)\s*(?:km|公里)/i);
       return match ? Number(match[1]) : null;
     }
